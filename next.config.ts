@@ -2,38 +2,38 @@
 const nextConfig = {
   output: 'standalone',
   
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client']
-  },
+  serverExternalPackages: ['@prisma/client'],
   
   images: {
     domains: [
       'guionix-brain-production.up.railway.app',
-      'res.cloudinary.com',
-      'images.unsplash.com'
+      'guionix-ai-orchestrator-production.up.railway.app',
+      'guionix-script-engine-production.up.railway.app',
+      'guionix-export-engine-production.up.railway.app'
     ]
   },
   
   async rewrites() {
     return [
       {
-        source: '/api/external/brain/:path*',
-        destination: 'https://guionix-brain-production.up.railway.app/:path*'
-      },
-      {
-        source: '/api/external/ai/:path*',
-        destination: 'https://guionix-ai-orchestrator-production.up.railway.app/:path*'
-      },
-      {
-        source: '/api/external/script/:path*',
-        destination: 'https://guionix-script-engine-production.up.railway.app/:path*'
-      },
-      {
-        source: '/api/external/export/:path*',
-        destination: 'https://guionix-export-engine-production.up.railway.app/:path*'
+        source: '/api/external/:path*',
+        destination: '/api/external/:path*'
       }
-    ]
+    ];
+  },
+  
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+        ],
+      },
+    ];
   }
 }
 
-export default nextConfig
+module.exports = nextConfig
