@@ -51,6 +51,7 @@ model User {
   email            String          @unique
   emailVerified    DateTime?       @map("email_verified")
   image            String?
+  password         String?
   role             UserRole        @default(EDITOR)
   status           UserStatus      @default(PENDING)
   firstName        String?         @map("first_name")
@@ -66,6 +67,8 @@ model User {
   updatedAt        DateTime        @updatedAt @map("updated_at")
   lastLoginAt      DateTime?       @map("last_login_at")
   createdBy        String?         @map("created_by")
+  resetToken       String?         @map("reset_token")
+  resetTokenExpiry DateTime?       @map("reset_token_expiry")
   accounts         Account[]
   aiUsage          AIUsageLog[]
   auditLogs        AuditLog[]
