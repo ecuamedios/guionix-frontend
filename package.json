@@ -4,16 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate && next build --no-lint",
-    "start": "node server.js",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint",
-    "db:generate": "npx prisma generate",
-    "db:migrate": "npx prisma migrate deploy",
-    "db:studio": "npx prisma studio",
-    "db:seed": "npx tsx prisma/seed.ts",
-    "db:reset": "npx prisma migrate reset --force && npm run db:seed",
-    "railway:build": "npm run build",
-    "railway:start": "npm run start"
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
