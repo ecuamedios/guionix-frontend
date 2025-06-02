@@ -63,7 +63,8 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/api") &&
     !pathname.startsWith("/api/auth") &&
     !pathname.startsWith("/api/test") &&
-    !pathname.startsWith("/api/dev-auth")
+    !pathname.startsWith("/api/dev-auth") &&
+    !pathname.startsWith("/api/health")
   ) {
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
