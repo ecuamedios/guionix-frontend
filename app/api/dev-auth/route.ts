@@ -1,6 +1,6 @@
 // app/api/dev-auth/route.ts - Development authentication (remove in production)
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const token = Buffer.from(JSON.stringify(sessionData)).toString('base64');
 
     // Set cookie
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set('dev-session', token, {
       httpOnly: true,
       secure: false, // Development only
@@ -66,11 +66,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Dev Auth Error:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({
       error: "Authentication failed",
-      details: error.message,
+      details: errorMessage,
     }, { status: 500 });
   }
 }

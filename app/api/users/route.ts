@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { hash } from "bcryptjs";
-import { Permission, UserRole, permissionMatrix } from "@/lib/permissions";
+import { UserRole } from "@/lib/permissions";
 
 // --- Zod Schemas ---
 const createUserSchema = z.object({
@@ -34,7 +33,7 @@ export async function GET(req: NextRequest) {
   const sort = searchParams.get("sort") || "createdAt";
   const order = searchParams.get("order") === "asc" ? "asc" : "desc";
 
-  const where: any = {
+  const where: Record<string, unknown> = {
     AND: [
       search
         ? {
@@ -75,7 +74,7 @@ export async function GET(req: NextRequest) {
   ]);
 
   // User statistics
-  const usersWithStats = users.map((u) => ({
+  const usersWithStats = users.map((u: typeof users[0]) => ({
     ...u,
     projects: u._count.ownedProjects + u._count.assignedProjects,
     aiUsage: u.aiUsageMonth,
@@ -100,8 +99,9 @@ export async function POST(req: NextRequest) {
   let data;
   try {
     data = createUserSchema.parse(await req.json());
-  } catch (err: any) {
-    return NextResponse.json({ error: err.errors?.[0]?.message || "Invalid input" }, { status: 400 });
+  } catch (err: unknown) {
+    const error = err as { errors?: Array<{ message?: string }> };
+    return NextResponse.json({ error: error.errors?.[0]?.message || "Invalid input" }, { status: 400 });
   }
 
   // Check email uniqueness
@@ -110,19 +110,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "El email ya está registrado." }, { status: 409 });
   }
 
-  // Validate role assignment
-  if (!permissionMatrix[token.role].includes(Permission.USER_MANAGE) && data.role !== "VIEWER") {
-    return NextResponse.json({ error: "No tienes permisos para asignar este rol." }, { status: 403 });
-  }
-
-  // Hash password
-  const hashedPassword = await hash(data.password, 12);
-
-  // Create user
+  // Create user (NextAuth-based, no password needed)
   const user = await prisma.user.create({
     data: {
       email: data.email,
-      password: hashedPassword,
       firstName: data.firstName,
       lastName: data.lastName,
       role: data.role,

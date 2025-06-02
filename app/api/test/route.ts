@@ -1,8 +1,8 @@
 // app/api/test/route.ts - API test endpoint
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Test database connection
     const userCount = await prisma.user.count();
@@ -54,11 +54,12 @@ export async function GET(req: NextRequest) {
         hasGoogleOAuth: !!process.env.GOOGLE_CLIENT_ID,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API Test Error:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: errorMessage,
       timestamp: new Date().toISOString(),
     }, { status: 500 });
   }

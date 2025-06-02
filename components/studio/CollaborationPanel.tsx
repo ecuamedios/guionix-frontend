@@ -2,7 +2,6 @@
 // filepath: components/studio/CollaborationPanel.tsx
 "use client";
 import { useEffect, useState } from "react";
-import type { CollaborationLock, CollaborationComment } from "@/types/collaboration";
 import { useCollaboration } from "@/hooks/useCollaboration";
 import { UserCircle, Lock, Unlock } from "lucide-react";
 
@@ -24,7 +23,7 @@ export default function CollaborationPanel({ resourceId, currentUserId }: Collab
       fetchComments();
     }, 4000);
     return () => clearInterval(interval);
-  }, [resourceId]);
+  }, [resourceId, fetchLocks, fetchComments]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;

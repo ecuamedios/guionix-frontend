@@ -1,7 +1,7 @@
 // components/studio/HierarchyNavigation.tsx (AVANZADO)
 // filepath: components/studio/HierarchyNavigation.tsx
 "use client";
-import type { Project, Capa, Beat } from "@/types/studio";
+import type { Project } from "@/types/studio";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 

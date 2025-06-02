@@ -5,7 +5,17 @@ import ProjectSelector from "@/components/studio/ProjectSelector";
 import ProgressTracker from "@/components/studio/ProgressTracker";
 
 export default function StudioMainPage() {
-  // Aquí puedes traer datos reales de proyectos del usuario
+  // Demo project data that matches the Project type
+  const demoProject = {
+    id: "demo-project",
+    titulo: "Proyecto de Ejemplo",
+    ownerId: "demo-user",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    status: "ACTIVE" as const,
+    capas: []
+  };
+
   return (
     <StudioLayout
       sidebar={<ProjectSelector />}
@@ -16,7 +26,7 @@ export default function StudioMainPage() {
         <p className="text-gray-400 mb-6">
           Selecciona un proyecto para comenzar a escribir, editar o colaborar en tus guiones.
         </p>
-        <ProgressTracker project={{ id: "", titulo: "Demo", capas: [] }} />
+        <ProgressTracker project={demoProject} />
       </div>
     </StudioLayout>
   );

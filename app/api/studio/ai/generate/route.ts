@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const aiSchema = z.object({
   prompt: z.string().min(5),
-  model: z.string().default("gpt-4"),
+  model: z.enum(["gpt-4", "gpt-3.5", "claude", "xai"]).default("gpt-4"),
   temperature: z.number().min(0).max(2).optional(),
   maxTokens: z.number().min(16).max(2048).optional(),
   projectId: z.string().optional(),
@@ -21,8 +21,9 @@ export async function POST(req: NextRequest) {
   let data;
   try {
     data = aiSchema.parse(await req.json());
-  } catch (err: any) {
-    return NextResponse.json({ error: err.errors?.[0]?.message || "Datos inválidos" }, { status: 400 });
+  } catch (err: unknown) {
+    const error = err as { errors?: Array<{ message?: string }> };
+    return NextResponse.json({ error: error.errors?.[0]?.message || "Datos inválidos" }, { status: 400 });
   }
 
   try {
@@ -31,7 +32,8 @@ export async function POST(req: NextRequest) {
       userId: token.id,
     });
     return NextResponse.json(aiResult);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Error IA" }, { status: 500 });
+  } catch (e: unknown) {
+    const error = e as { message?: string };
+    return NextResponse.json({ error: error.message || "Error IA" }, { status: 500 });
   }
 }

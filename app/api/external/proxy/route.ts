@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
       : await proxyRes.text();
 
     return NextResponse.json({ data, status: proxyRes.status });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Error en proxy externo" }, { status: 500 });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : "Error en proxy externo";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

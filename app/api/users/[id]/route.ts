@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { compare, hash } from "bcryptjs";
-import { Permission, UserRole, permissionMatrix } from "@/lib/permissions";
+import { UserRole } from "@/lib/permissions";
 
 // --- Utils ---
 function isAdmin(role: UserRole) {
@@ -22,16 +21,14 @@ const updateUserSchema = z.object({
   role: z.enum(["SUPER_ADMIN", "DIRECTOR", "SUPERVISOR", "EDITOR", "VIEWER"]).optional(),
   aiBudgetLimit: z.number().min(0).optional(),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]).optional(),
-  password: z.string().min(6).optional(),
-  oldPassword: z.string().min(6).optional(),
 });
 
 // --- GET: Fetch single user ---
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = params;
+  const { id } = await params;
   // Only admins or the user themselves can view
   if (!isAdmin(token.role) && token.id !== id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -66,19 +63,19 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // --- PUT: Update user ---
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = params;
-  const isSelf = token.id === id;
+  const { id } = await params;
   const isUserAdmin = isAdmin(token.role);
 
   let data;
   try {
     data = updateUserSchema.parse(await req.json());
-  } catch (err: any) {
-    return NextResponse.json({ error: err.errors?.[0]?.message || "Invalid input" }, { status: 400 });
+  } catch (err: unknown) {
+    const error = err as { errors?: Array<{ message?: string }> };
+    return NextResponse.json({ error: error.errors?.[0]?.message || "Invalid input" }, { status: 400 });
   }
 
   // Only admins can change role, status, aiBudgetLimit, or email
@@ -96,23 +93,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: "Debe existir al menos un SUPER_ADMIN activo" }, { status: 400 });
     }
   }
-
-  // Password change: verify old password
-  if (data.password) {
-    if (!isSelf && !isUserAdmin) {
-      return NextResponse.json({ error: "Solo puedes cambiar tu propia contraseña" }, { status: 403 });
-    }
-    if (!isUserAdmin) {
-      const user = await prisma.user.findUnique({ where: { id } });
-      if (!user?.password || !data.oldPassword || !(await compare(data.oldPassword, user.password))) {
-        return NextResponse.json({ error: "Contraseña actual incorrecta" }, { status: 400 });
-      }
-    }
-    data.password = await hash(data.password, 12);
-  } else {
-    delete data.password;
-  }
-  delete data.oldPassword;
 
   // Update user
   const updated = await prisma.user.update({
@@ -137,11 +117,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 // --- DELETE: Soft delete user ---
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = params;
+  const { id } = await params;
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
 

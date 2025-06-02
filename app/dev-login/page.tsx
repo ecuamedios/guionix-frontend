@@ -6,7 +6,7 @@ import { Film, User } from "lucide-react";
 export default function DevLoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{ success?: string; error?: string } | null>(null);
 
   // Only show in development
   if (process.env.NODE_ENV === "production") {
@@ -42,8 +42,9 @@ export default function DevLoginPage() {
           window.location.href = "/dev-dashboard";
         }, 1500);
       }
-    } catch (error: any) {
-      setResult({ error: error.message });
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      setResult({ error: err.message || "Error occurred" });
     } finally {
       setLoading(false);
     }

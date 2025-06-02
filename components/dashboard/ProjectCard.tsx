@@ -1,6 +1,6 @@
 // components/dashboard/ProjectCard.tsx
 "use client";
-import { Film, Clock, Users, Calendar } from "lucide-react";
+import { Film, Users, Calendar } from "lucide-react";
 import Link from "next/link";
 
 interface ProjectCardProps {

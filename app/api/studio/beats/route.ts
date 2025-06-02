@@ -1,35 +1,24 @@
-// app/api/studio/beats/route.ts (AVANZADO)
-// filepath: app/api/studio/beats/route.ts
+// app/api/studio/beats/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { z } from "zod";
 import { getToken } from "next-auth/jwt";
-
-const beatSchema = z.object({
-  titulo: z.string().min(2),
-  contenido: z.string().min(1),
-  capaId: z.string(),
-  orden: z.number().optional(),
-});
 
 export async function POST(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  let data;
-  try {
-    data = beatSchema.parse(await req.json());
-  } catch (err: any) {
-    return NextResponse.json({ error: err.errors?.[0]?.message || "Datos inválidos" }, { status: 400 });
+  
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const beat = await prisma.beat.create({
-    data: {
-      ...data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  });
-
-  return NextResponse.json({ beat }, { status: 201 });
+  try {
+    const data = await req.json();
+    
+    // TODO: Implement beat creation when models are ready
+    return NextResponse.json({ 
+      message: "Beat creation not implemented yet",
+      data 
+    }, { status: 201 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
+  }
 }

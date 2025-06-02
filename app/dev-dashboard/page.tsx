@@ -1,5 +1,6 @@
 // app/dev-dashboard/page.tsx - Development dashboard access (remove in production)
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import StatsPanel from "@/components/dashboard/StatsPanel";
 import QuickActions from "@/components/dashboard/QuickActions";
@@ -37,24 +38,24 @@ export default function DevDashboardPage() {
       <div className="mt-8 p-4 bg-gray-900 rounded-lg border border-gray-700">
         <h3 className="text-lg font-semibold text-white mb-2">Testing Links</h3>
         <div className="flex flex-wrap gap-4">
-          <a 
+          <Link 
             href="/studio" 
             className="text-yellow-400 hover:underline"
           >
             Studio →
-          </a>
-          <a 
+          </Link>
+          <Link 
             href="/analytics" 
             className="text-yellow-400 hover:underline"
           >
             Analytics →
-          </a>
-          <a 
+          </Link>
+          <Link 
             href="/projects" 
             className="text-yellow-400 hover:underline"
           >
             Projects →
-          </a>
+          </Link>
           <a 
             href="http://localhost:5557" 
             target="_blank"

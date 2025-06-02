@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const passwordStrength = (password: string) => {
-  if (password.length < 6) return "Débil";
+  if (!password || password.length < 6) return "Débil";
   if (password.match(/[A-Z]/) && password.match(/[0-9]/) && password.length >= 8) return "Fuerte";
   return "Media";
 };
@@ -25,7 +25,7 @@ const schema = z.object({
   role: z.enum(["SUPER_ADMIN", "DIRECTOR", "SUPERVISOR", "EDITOR", "VIEWER"], {
     required_error: "Selecciona un rol",
   }),
-  terms: z.literal(true, { errorMap: () => ({ message: "Debes aceptar los términos" }) }),
+  terms: z.boolean().refine(val => val === true, { message: "Debes aceptar los términos" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -41,14 +41,14 @@ export default function RegisterForm() {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { role: "EDITOR", terms: false },
+    defaultValues: { role: "EDITOR", terms: false as boolean },
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const password = watch("password");
+  const password = watch("password") || "";
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -66,7 +66,7 @@ export default function RegisterForm() {
       } else {
         setSuccess(true);
       }
-    } catch (e) {
+    } catch {
       setError("Error de red o servidor");
     }
     setLoading(false);

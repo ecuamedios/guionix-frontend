@@ -2,24 +2,24 @@
 // filepath: app/api/studio/validation/blake-snyder/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { validateBlakeSnyderStructure, blakeSnyderBeats } from "@/lib/validation/blakeSnyderValidation";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { getToken } from "next-auth/jwt";
 
 export async function POST(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { projectId } = await req.json();
-  if (!projectId) return NextResponse.json({ error: "projectId requerido" }, { status: 400 });
+  const { peliculaId } = await req.json();
+  if (!peliculaId) return NextResponse.json({ error: "peliculaId requerido" }, { status: 400 });
 
-  // Obtén los beats del proyecto desde la base de datos
+  // Obtén las capas del proyecto desde la base de datos
   const capas = await prisma.capa.findMany({
-    where: { projectId },
-    include: { beats: true },
-    orderBy: { orden: "asc" },
+    where: { peliculaId },
+    include: { minutos: true },
+    orderBy: { numero: "asc" },
   });
 
-  const allBeats = capas.flatMap(c => c.beats.map(b => b.titulo));
+  const allBeats = capas.map(c => c.blakeSnyderBeat);
   const validation = validateBlakeSnyderStructure(allBeats);
 
   return NextResponse.json({

@@ -1,4 +1,4 @@
-import { NextAuthOptions, User, Session } from "next-auth"
+import { NextAuthOptions, Session } from "next-auth"
 import { JWT } from "next-auth/jwt"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
@@ -239,10 +239,10 @@ export const authOptions: NextAuthOptions = {
   },
 
   events: {
-    async signIn({ user, account, profile, isNewUser }) {
+    async signIn({ user }) {
       console.log(`User ${user.email} signed in`)
     },
-    async signOut({ session, token }) {
+    async signOut() {
       console.log(`User signed out`)
     },
     async createUser({ user }) {

@@ -1,6 +1,6 @@
 // lib/utils/scriptUtils.ts (AVANZADO)
 // filepath: lib/utils/scriptUtils.ts
-import type { Project, Capa, Beat } from "@/types/studio";
+import type { Project, Beat } from "@/types/studio";
 
 export function countWords(text: string): number {
   return text.trim().split(/\s+/).length;

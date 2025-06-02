@@ -18,6 +18,6 @@ export const scriptSchema = z.object({
   ),
 });
 
-export function validateScript(data: any) {
+export function validateScript(data: unknown) {
   return scriptSchema.safeParse(data);
 }
