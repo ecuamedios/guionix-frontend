@@ -1,9 +1,13 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+
+# Verify npm is available and install if needed
+RUN apk add --no-cache npm
+RUN which npm && npm --version
 
 # Copy package files
 COPY package.json package-lock.json* ./
@@ -16,6 +20,9 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Set a temporary DATABASE_URL for build (Prisma generation needs it)
+ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 
 # Generate Prisma Client
 RUN npx prisma generate
