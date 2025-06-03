@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"; // Si usas shadcn/ui
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Film } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
 const schema = z.object({
@@ -88,8 +88,7 @@ export default function LoginForm() {
       className="w-full max-w-md bg-gray-900 rounded-xl shadow-2xl p-8 space-y-6 border border-gray-800"
       aria-label="Formulario de inicio de sesión"
     >
-      <div className="flex items-center justify-center mb-4">
-        <Film className="w-8 h-8 text-yellow-400 mr-2" aria-hidden="true" />
+      <div className="text-center mb-4">
         <h2 className="text-2xl font-bold text-white tracking-wide">Iniciar sesión</h2>
       </div>
         <div>
