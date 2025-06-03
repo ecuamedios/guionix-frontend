@@ -1,5 +1,8 @@
 import React from 'react';
 import { YouTubeVideo } from '@/types/youtube';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { 
   Play, 
   Eye, 
@@ -12,9 +15,20 @@ import {
 interface VideoCardProps {
   video: YouTubeVideo;
   onClick: () => void;
+  className?: string;
+  onViewVideo?: (video: YouTubeVideo) => void;
+  onGenerateInsights?: (video: YouTubeVideo) => void;
+  isGeneratingInsights?: boolean;
 }
 
-export function VideoCard({ video, onClick }: VideoCardProps) {
+export function VideoCard({ 
+  video, 
+  onClick, 
+  className,
+  onViewVideo,
+  onGenerateInsights,
+  isGeneratingInsights 
+}: VideoCardProps) {
   const formatNumber = (num: string) => {
     const number = parseInt(num);
     if (number >= 1000000) {
@@ -148,7 +162,7 @@ export function VideoCard({ video, onClick }: VideoCardProps) {
         <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
           <Button
             className="w-full bg-gradient-to-r from-[#cb4335] to-[#a93226] hover:from-[#a93226] hover:to-[#922b21] text-white font-semibold transition-all duration-200"
-            onClick={() => onGenerateInsights(video)}
+            onClick={() => onGenerateInsights?.(video)}
             disabled={isGeneratingInsights}
           >
             {isGeneratingInsights ? (
