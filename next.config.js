@@ -11,6 +11,12 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
+  // Additional build optimizations
+  swcMinify: true,
+  experimental: {
+    esmExternals: false,
+  },
+  
   images: {
     domains: [
       'guionix-brain-production.up.railway.app',
