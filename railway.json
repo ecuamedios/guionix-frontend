@@ -2,6 +2,7 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
+    "nixpacksConfigPath": "nixpacks.toml",
     "buildCommand": "npm run build:railway"
   },
   "deploy": {
@@ -10,5 +11,15 @@
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "NODE_ENV": "production",
+        "SKIP_ENV_VALIDATION": "1",
+        "NIXPACKS_BUILDER": "true",
+        "DISABLE_DOCKER": "true"
+      }
+    }
   }
 }

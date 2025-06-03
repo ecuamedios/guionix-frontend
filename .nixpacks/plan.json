@@ -1,0 +1,25 @@
+{
+  "providers": ["node"],
+  "buildImage": "nixpkgs/nixpkgs:nixos-22.11",
+  "variables": {
+    "NODE_ENV": "production",
+    "SKIP_ENV_VALIDATION": "1",
+    "NIXPACKS_BUILDER": "true",
+    "DISABLE_DOCKER": "true"
+  },
+  "phases": {
+    "setup": {
+      "nixPkgs": ["nodejs-18_x", "npm-9_x"]
+    },
+    "install": {
+      "cmd": "npm ci --only=production"
+    },
+    "build": {
+      "cmd": "npm run build:railway",
+      "dependsOn": ["install"]
+    }
+  },
+  "start": {
+    "cmd": "npm start"
+  }
+}

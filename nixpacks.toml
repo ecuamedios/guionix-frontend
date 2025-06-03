@@ -1,10 +1,11 @@
-# Nixpacks configuration for GUIONIX Next.js app
+# Nixpacks configuration for GUIONIX Next.js app - Force Nixpacks usage
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 SKIP_ENV_VALIDATION = "1"
-NPM_CONFIG_INCLUDE = "optional"
+NIXPACKS_BUILDER = "true"
+DISABLE_DOCKER = "true"
 
 [phases.setup]
 nixPkgs = ["nodejs-18_x", "npm-9_x"]
@@ -18,3 +19,7 @@ dependsOn = ["install"]
 
 [start]
 cmd = "npm start"
+
+# Explicitly disable Docker detection
+[build]
+cmd = "echo 'Using Nixpacks, not Docker'"
