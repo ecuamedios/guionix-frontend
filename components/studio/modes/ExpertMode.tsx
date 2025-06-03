@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { type StudioMode } from "@/hooks/useStudioMode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,7 +39,7 @@ interface Project {
 }
 
 interface ExpertModeProps {
-  onModeSwitch: (mode: string) => void;
+  onModeSwitch: (mode: StudioMode) => void;
 }
 
 export default function ExpertMode({ onModeSwitch }: ExpertModeProps) {

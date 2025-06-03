@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useStudioMode } from "@/hooks/useStudioMode";
+import { useStudioMode, type StudioMode } from "@/hooks/useStudioMode";
 import { 
   Lightbulb, 
   ArrowRight, 
@@ -28,7 +28,11 @@ interface Phase {
   estimatedTime: string;
 }
 
-export default function NewUserMode() {
+interface NewUserModeProps {
+  onModeSwitch: (mode: StudioMode) => void;
+}
+
+export default function NewUserMode({ onModeSwitch }: NewUserModeProps) {
   const { switchMode } = useStudioMode();
   const router = useRouter();
   const [currentPhase, setCurrentPhase] = useState(0);

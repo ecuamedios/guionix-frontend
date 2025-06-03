@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { type StudioMode } from "@/hooks/useStudioMode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -59,7 +60,7 @@ interface Comment {
 }
 
 interface CollabModeProps {
-  onModeSwitch: (mode: string) => void;
+  onModeSwitch: (mode: StudioMode) => void;
 }
 
 export default function CollabMode({ onModeSwitch }: CollabModeProps) {

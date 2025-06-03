@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { type StudioMode } from "@/hooks/useStudioMode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -40,7 +41,7 @@ interface ImportedFile {
 }
 
 interface ImportModeProps {
-  onModeSwitch: (mode: string) => void;
+  onModeSwitch: (mode: StudioMode) => void;
   onProjectCreated?: (project: any) => void;
 }
 
