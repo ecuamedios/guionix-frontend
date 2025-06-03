@@ -18,6 +18,8 @@ function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
 const PUBLIC_PATHS = [
   "/login",
   "/register",
+  "/forgot-password",
+  "/reset-password",
   "/dev-dashboard", // Development only
   "/dev-login", // Development only
   "/simple-login", // Development only
@@ -30,7 +32,8 @@ export async function middleware(req: NextRequest) {
   if (
     PUBLIC_PATHS.includes(pathname) ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/health")
+    pathname.startsWith("/api/health") ||
+    pathname === "/" // Landing page is public
   ) {
     return NextResponse.next();
   }
@@ -38,25 +41,23 @@ export async function middleware(req: NextRequest) {
   // Get session token
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // Protect all routes except login/register
+  // Protect all routes except login/register and landing page
   if (!token) {
-    // If trying to access protected route without session, redirect to root (which will show login)
-    if (pathname !== "/") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+    // If trying to access protected route without session, redirect to login
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   // Protect /admin/*
   if (pathname.startsWith("/admin")) {
     if (!token || !["SUPER_ADMIN", "DIRECTOR"].includes(token.role)) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
   // Protect /studio/*
   if (pathname.startsWith("/studio")) {
     if (!token || !hasRole(token.role, "EDITOR")) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
