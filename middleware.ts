@@ -29,7 +29,8 @@ export async function middleware(req: NextRequest) {
   // Allow public routes and NextAuth API
   if (
     PUBLIC_PATHS.includes(pathname) ||
-    pathname.startsWith("/api/auth")
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/health")
   ) {
     return NextResponse.next();
   }
@@ -37,31 +38,25 @@ export async function middleware(req: NextRequest) {
   // Get session token
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // Protect root dashboard route
-  if (pathname === "/") {
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-  }
-
-  // Protect /dashboard/* and /projects/*
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/projects")) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
+  // Protect all routes except login/register
+  if (!token) {
+    // If trying to access protected route without session, redirect to root (which will show login)
+    if (pathname !== "/") {
+      return NextResponse.redirect(new URL("/", req.url));
     }
   }
 
   // Protect /admin/*
   if (pathname.startsWith("/admin")) {
     if (!token || !["SUPER_ADMIN", "DIRECTOR"].includes(token.role)) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
   }
 
   // Protect /studio/*
   if (pathname.startsWith("/studio")) {
     if (!token || !hasRole(token.role, "EDITOR")) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
   }
 

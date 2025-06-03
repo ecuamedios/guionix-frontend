@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function createTestUser() {
   try {
     // Hash the password
-    const hashedPassword = await bcrypt.hash('password123', 12);
+    const hashedPassword = await bcrypt.hash('test123', 12);
     
     // Create or update test user
     const user = await prisma.user.upsert({
@@ -29,8 +29,9 @@ async function createTestUser() {
 
     console.log('✅ Test user created/updated:');
     console.log('📧 Email: test@guionix.com');
-    console.log('🔑 Password: password123');
+    console.log('🔑 Password: test123');
     console.log('👤 User ID:', user.id);
+    console.log('🎬 Role:', user.role);
     
   } catch (error) {
     console.error('❌ Error creating test user:', error);
