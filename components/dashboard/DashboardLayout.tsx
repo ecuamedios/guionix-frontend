@@ -19,7 +19,7 @@ export default function DashboardLayout({ children, sidebar, topbar }: Dashboard
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-gray-900 to-gray-800">
       {/* Topbar */}
       <header className="flex items-center justify-between px-6 py-4 bg-gray-950/80 border-b border-gray-800 shadow-lg z-20">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/projects" className="flex items-center gap-2">
           <Film className="w-7 h-7 text-yellow-400" />
           <span className="text-xl font-bold text-white tracking-wide">GUIONIX Dashboard</span>
         </Link>

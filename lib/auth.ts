@@ -14,9 +14,6 @@ declare module "next-auth" {
       name: string
       role: UserRole
       permissions: string[]
-      organizationId?: string
-      teamId?: string
-      avatar?: string
     }
   }
 
@@ -25,9 +22,6 @@ declare module "next-auth" {
     email: string
     name: string
     role: UserRole
-    organizationId?: string
-    teamId?: string
-    avatar?: string
   }
 }
 
@@ -36,8 +30,6 @@ declare module "next-auth/jwt" {
     id: string
     role: UserRole
     permissions: string[]
-    organizationId?: string
-    teamId?: string
   }
 }
 
@@ -118,10 +110,12 @@ export function hasPermission(userPermissions: string[], requiredPermission: str
 
 // NextAuth configuration
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Don't use adapter for credentials provider - it conflicts with JWT strategy
+  // adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "credentials",
+      id: "credentials",
       credentials: {
         email: { 
           label: "Email", 
@@ -133,59 +127,41 @@ export const authOptions: NextAuthOptions = {
           type: "password" 
         }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
         try {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error("Email y contraseña son requeridos")
-          }
-
-          // Find user in database (assuming password field will be added to User model)
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email.toLowerCase()
+          // Look up user in database
+          const user = await prisma.user.findFirst({
+            where: { 
+              email: credentials.email.toLowerCase(),
+              status: "ACTIVE"  // Only allow active users to login
             }
-          })
+          }) as any;
 
-          if (!user) {
-            throw new Error("Credenciales inválidas")
+          if (!user || !user.password) {
+            return null;
           }
 
-          // Check if user is active
-          if (user.status !== "ACTIVE") {
-            throw new Error("Cuenta desactivada. Contacta al administrador")
-          }
-
-          // For now, we'll need to add password field to User model
-          // This is a temporary implementation - password should be stored in User model
-          // Verify password (placeholder - need to add password field to User model)
-          // const isValidPassword = await bcrypt.compare(credentials.password, user.password)
-          
-          // Temporary: allow any password for demo
-          const isValidPassword = credentials.password === "demo123"
+          // Verify password
+          const isValidPassword = await verifyPassword(credentials.password, user.password);
           
           if (!isValidPassword) {
-            throw new Error("Credenciales inválidas")
+            return null;
           }
 
-          // Update last login
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { lastLoginAt: new Date() }
-          })
-
-          // Return user object
+          // Return user object (password excluded)
           return {
             id: user.id,
             email: user.email,
-            name: user.name || user.firstName || "Usuario",
-            role: user.role as UserRole,
-            organizationId: undefined, // Will be added when organization support is implemented
-            teamId: undefined, // Will be added when team support is implemented
-            avatar: user.image || undefined
-          }
+            name: user.name || user.email,
+            role: user.role
+          };
         } catch (error) {
-          console.error("Auth error:", error)
-          throw error
+          console.error("Authentication error:", error);
+          return null;
         }
       }
     })
@@ -203,8 +179,6 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.role = user.role
         token.permissions = getRolePermissions(user.role)
-        token.organizationId = user.organizationId
-        token.teamId = user.teamId
       }
 
       // Return previous token if the access token has not expired yet
@@ -216,8 +190,6 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id
         session.user.role = token.role
         session.user.permissions = token.permissions
-        session.user.organizationId = token.organizationId
-        session.user.teamId = token.teamId
       }
 
       return session
@@ -228,29 +200,27 @@ export const authOptions: NextAuthOptions = {
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
+      // Default redirect to projects page after successful login
+      return `${baseUrl}/projects`
     }
   },
 
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    error: "/auth/error"
+    signIn: "/login",
+    signOut: "/",
+    error: "/login"
   },
 
   events: {
-    async signIn({ user }) {
-      console.log(`User ${user.email} signed in`)
+    async signIn({ user, account, profile }) {
+      console.log(`User ${user.email} signed in successfully`);
     },
-    async signOut() {
-      console.log(`User signed out`)
-    },
-    async createUser({ user }) {
-      console.log(`New user created: ${user.email}`)
+    async signOut({ session }) {
+      console.log(`User signed out: ${session?.user?.email}`);
     }
   },
 
-  debug: process.env.NODE_ENV === "development",
+  debug: false,
   
   secret: process.env.NEXTAUTH_SECRET,
 }

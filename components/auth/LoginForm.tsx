@@ -12,8 +12,8 @@ import { Loader2, Film } from "lucide-react";
 import Link from "next/link";
 
 const schema = z.object({
-  email: z.string().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
+  email: z.string().min(1, { message: "Email es requerido" }).email({ message: "Email inválido" }),
+  password: z.string().min(1, { message: "Contraseña es requerida" }).min(6, { message: "Mínimo 6 caracteres" }),
   remember: z.boolean().optional(),
 });
 
@@ -23,10 +23,16 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { remember: false },
+    defaultValues: { 
+      email: "",
+      password: "",
+      remember: false 
+    },
+    mode: "onSubmit", // Only validate on submit
   });
 
   const [loading, setLoading] = useState(false);
@@ -35,28 +41,39 @@ export default function LoginForm() {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     setError(null);
-    const res = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) setError("Email o contraseña incorrectos");
-    else if (res?.ok) window.location.href = "/dashboard";
+    
+    try {
+      const res = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+      
+      if (res?.error) {
+        setError("Email o contraseña incorrectos");
+      } else if (res?.ok) {
+        // Successful login - redirect to projects page
+        window.location.href = "/projects";
+      } else {
+        setError("Error inesperado al iniciar sesión");
+      }
+    } catch (error) {
+      setError("Error al iniciar sesión. Inténtalo de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-gray-900 to-gray-800">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md bg-gray-900 rounded-xl shadow-2xl p-8 space-y-6 border border-gray-800"
-        aria-label="Formulario de inicio de sesión"
-      >
-        <div className="flex items-center justify-center mb-4">
-          <Film className="w-8 h-8 text-yellow-400 mr-2" aria-hidden="true" />
-          <h1 className="text-2xl font-bold text-white tracking-wide">GUIONIX</h1>
-        </div>
-        <h2 className="text-xl font-semibold text-white text-center mb-2">Iniciar sesión</h2>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full max-w-md bg-gray-900 rounded-xl shadow-2xl p-8 space-y-6 border border-gray-800"
+      aria-label="Formulario de inicio de sesión"
+    >
+      <div className="flex items-center justify-center mb-4">
+        <Film className="w-8 h-8 text-yellow-400 mr-2" aria-hidden="true" />
+        <h2 className="text-2xl font-bold text-white tracking-wide">Iniciar sesión</h2>
+      </div>
         <div>
           <label htmlFor="email" className="block text-gray-300 mb-1">
             Email
@@ -123,11 +140,11 @@ export default function LoginForm() {
         <Button
           type="submit"
           className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded transition-all duration-200 flex items-center justify-center"
-          disabled={loading}
-          aria-busy={loading}
+          disabled={loading || isSubmitting}
+          aria-busy={loading || isSubmitting}
         >
-          {loading ? <Loader2 className="animate-spin mr-2" /> : null}
-          Ingresar
+          {(loading || isSubmitting) ? <Loader2 className="animate-spin mr-2" /> : null}
+          {(loading || isSubmitting) ? "Ingresando..." : "Ingresar"}
         </Button>
         <div className="flex items-center my-4">
           <hr className="flex-1 border-gray-700" />
@@ -161,7 +178,6 @@ export default function LoginForm() {
           </svg>
           Ingresar con Google
         </Button>
-      </form>
-    </div>
+    </form>
   );
 }

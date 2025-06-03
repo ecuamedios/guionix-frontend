@@ -21,6 +21,7 @@ const PUBLIC_PATHS = [
   "/register",
   "/dev-dashboard", // Development only
   "/dev-login", // Development only
+  "/simple-login", // Development only
 ];
 
 export async function middleware(req: NextRequest) {
@@ -37,8 +38,8 @@ export async function middleware(req: NextRequest) {
   // Get session token
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // Protect /dashboard/*
-  if (pathname.startsWith("/dashboard")) {
+  // Protect /dashboard/* and /projects/*
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/projects")) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
@@ -77,6 +78,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/projects/:path*", 
     "/admin/:path*",
     "/studio/:path*",
     "/api/:path*",
