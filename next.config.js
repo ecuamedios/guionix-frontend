@@ -11,10 +11,39 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
-  // Additional build optimizations
+  // Build optimizations for Railway
   swcMinify: true,
+  compress: false, // Disable compression to save memory during build
+  poweredByHeader: false,
+  generateEtags: false,
+  
+  // Webpack optimizations for low memory environments
+  webpack: (config, { isServer }) => {
+    // Reduce memory usage during compilation
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      },
+    };
+    
+    // Limit concurrent builds
+    config.parallelism = 1;
+    
+    return config;
+  },
+  
   experimental: {
     esmExternals: false,
+    // Reduce memory usage
+    craCompat: true,
   },
   
   images: {

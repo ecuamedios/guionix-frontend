@@ -5,5 +5,5 @@ nixpacksConfigPath = "nixpacks.toml"
 [env]
 NODE_ENV = "production"
 SKIP_ENV_VALIDATION = "1"
-NODE_OPTIONS = "--max-old-space-size=2048"
+NODE_OPTIONS = "--max-old-space-size=1536"
 NIXPACKS_BUILDER = "true"
