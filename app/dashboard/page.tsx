@@ -47,7 +47,8 @@ import {
   Star,
   Clock3,
   Layers,
-  Brain
+  Brain,
+  Youtube
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -163,6 +164,11 @@ export default function DashboardPage() {
       name: "Proyectos",
       icon: Briefcase,
       href: "/projects"
+    },
+    {
+      name: "YouTube Insights",
+      icon: Youtube,
+      href: "/dashboard/youtube"
     },
     {
       name: "Actores",
