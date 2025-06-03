@@ -43,21 +43,39 @@ export default function LoginForm() {
     setError(null);
     
     try {
+      console.log("🔐 Attempting login with:", data.email);
+      console.log("🔐 NextAuth configuration check...");
+      
       const res = await signIn("credentials", {
         email: data.email,
         password: data.password,
         redirect: false,
       });
       
+      console.log("🔐 Login response:", res);
+      console.log("🔐 Response ok:", res?.ok);
+      console.log("🔐 Response error:", res?.error);
+      console.log("🔐 Response url:", res?.url);
+      
       if (res?.error) {
+        console.error("❌ Login error:", res.error);
         setError("Email o contraseña incorrectos");
       } else if (res?.ok) {
-        // Successful login - redirect to projects page
-        window.location.href = "/projects";
+        console.log("✅ Login successful!");
+        console.log("🔄 Waiting for session to update...");
+        
+        // Wait a moment for session to update
+        setTimeout(async () => {
+          console.log("🔄 Redirecting to dashboard...");
+          // Force a hard redirect to ensure session is recognized
+          window.location.href = "/";
+        }, 100);
       } else {
+        console.error("❌ Unexpected login response:", res);
         setError("Error inesperado al iniciar sesión");
       }
     } catch (error) {
+      console.error("❌ Login exception:", error);
       setError("Error al iniciar sesión. Inténtalo de nuevo.");
     } finally {
       setLoading(false);

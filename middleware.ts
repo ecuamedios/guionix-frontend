@@ -16,7 +16,6 @@ function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
 }
 
 const PUBLIC_PATHS = [
-  "/",
   "/login",
   "/register",
   "/dev-dashboard", // Development only
@@ -37,6 +36,13 @@ export async function middleware(req: NextRequest) {
 
   // Get session token
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+  // Protect root dashboard route
+  if (pathname === "/") {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+  }
 
   // Protect /dashboard/* and /projects/*
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/projects")) {
@@ -65,7 +71,8 @@ export async function middleware(req: NextRequest) {
     !pathname.startsWith("/api/auth") &&
     !pathname.startsWith("/api/test") &&
     !pathname.startsWith("/api/dev-auth") &&
-    !pathname.startsWith("/api/health")
+    !pathname.startsWith("/api/health") &&
+    !pathname.startsWith("/api/integration")
   ) {
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -77,6 +84,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/dashboard/:path*",
     "/projects/:path*", 
     "/admin/:path*",

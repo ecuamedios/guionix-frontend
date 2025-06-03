@@ -200,8 +200,8 @@ export const authOptions: NextAuthOptions = {
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
-      // Default redirect to projects page after successful login
-      return `${baseUrl}/projects`
+      // Default redirect to dashboard page after successful login
+      return `${baseUrl}/`
     }
   },
 

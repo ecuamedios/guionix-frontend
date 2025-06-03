@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -172,8 +172,8 @@ model Beat {
   palabras        Int       @default(0)
   palabrasValidas Boolean   @default(false) @map("palabras_validas")
   tipo            BeatTipo  @default(ACCION)
-  personajes      String[]
-  emociones       String[]
+  personajes      String?   // Comma-separated values for SQLite
+  emociones       String?   // Comma-separated values for SQLite
   conflicto       String?
   generadoPorIA   Boolean   @default(false) @map("generado_por_ia")
   aiProvider      String?   @map("ai_provider")

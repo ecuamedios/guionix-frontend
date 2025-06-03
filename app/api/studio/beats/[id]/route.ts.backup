@@ -1,0 +1,376 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { prisma } from "@/lib/prisma";
+import { BeatTipo } from "@prisma/client";
+import { z } from "zod";
+
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
+// Type for BeatLock to handle Prisma type issues
+interface BeatLock {
+  id: string;
+  userId: string;
+  beatId: string;
+  lockedAt: Date;
+  expiresAt: Date;
+  user?: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+}
+
+// Beat validation schema
+const beatUpdateSchema = z.object({
+  titulo: z.string().min(1, "El título es requerido").max(100, "El título no puede exceder 100 caracteres"),
+  contenido: z.string().min(1, "El contenido es requerido"),
+  tipo: z.nativeEnum(BeatTipo).optional(),
+  personajes: z.array(z.string()).optional(),
+  emociones: z.array(z.string()).optional(),
+  conflicto: z.string().optional(),
+});
+
+// Word count validation (36 words max for beats)
+function validateWordCount(text: string): { isValid: boolean; wordCount: number; error?: string } {
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  const wordCount = words.length;
+  
+  if (wordCount > 36) {
+    return {
+      isValid: false,
+      wordCount,
+      error: `El beat excede el límite de 36 palabras (${wordCount} palabras)`
+    };
+  }
+  
+  return { isValid: true, wordCount };
+}
+
+// GET /api/studio/beats/[id] - Get beat details
+export async function GET(req: NextRequest, { params }: RouteParams) {
+  try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token?.sub) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const beat = await prisma.beat.findUnique({
+      where: { id },
+      include: {
+        minuto: {
+          include: {
+            capa: {
+              include: {
+                pelicula: {
+                  include: {
+                    owner: true,
+                    members: true,
+                  }
+                }
+              }
+            }
+          }
+        },
+        locks: {
+          include: {
+            user: true,
+          }
+        },
+        comments: {
+          include: {
+            user: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          }
+        }
+      }
+    });
+
+    if (!beat) {
+      return NextResponse.json({ error: "Beat not found" }, { status: 404 });
+    }
+
+    // Check permissions - user must be owner or member of the project
+    const project = beat.minuto.capa.pelicula;
+    const hasAccess = project.ownerId === token.sub || 
+                     project.members.some(member => member.userId === token.sub);
+
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    return NextResponse.json({
+      beat: {
+        id: beat.id,
+        numero: beat.numero,
+        titulo: beat.titulo,
+        contenido: beat.contenido,
+        palabras: beat.palabras,
+        palabrasValidas: beat.palabrasValidas,
+        tipo: beat.tipo,
+        personajes: beat.personajes,
+        emociones: beat.emociones,
+        conflicto: beat.conflicto,
+        generadoPorIA: beat.generadoPorIA,
+        aiProvider: beat.aiProvider,
+        promptUsado: beat.promptUsado,
+        costoIA: beat.costoIA,
+        minutoId: beat.minutoId,
+        createdAt: beat.createdAt,
+        updatedAt: beat.updatedAt,
+        createdBy: beat.createdBy,
+        locks: beat.locks,
+        comments: beat.comments,
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching beat:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT /api/studio/beats/[id] - Update beat
+export async function PUT(req: NextRequest, { params }: RouteParams) {
+  try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token?.sub) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const body = await req.json();
+
+    // Validate request body
+    const validation = beatUpdateSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Invalid data", details: validation.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const data = validation.data;
+
+    // Validate word count for contenido
+    const wordValidation = validateWordCount(data.contenido);
+    if (!wordValidation.isValid) {
+      return NextResponse.json(
+        { error: wordValidation.error },
+        { status: 400 }
+      );
+    }
+
+    // Check if beat exists and user has permissions
+    const existingBeat = await prisma.beat.findUnique({
+      where: { id },
+      include: {
+        minuto: {
+          include: {
+            capa: {
+              include: {
+                pelicula: {
+                  include: {
+                    owner: true,
+                    members: true,
+                  }
+                }
+              }
+            }
+          }
+        },
+        locks: true,
+      }
+    });
+
+    if (!existingBeat) {
+      return NextResponse.json({ error: "Beat not found" }, { status: 404 });
+    }
+
+    // Check permissions
+    const project = existingBeat.minuto.capa.pelicula;
+    const hasAccess = project.ownerId === token.sub || 
+                     project.members.some(member => member.userId === token.sub);
+
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    // Check if beat is locked by another user
+    const locks = existingBeat.locks as BeatLock | null;
+    if (locks && locks.userId !== token.sub && 
+        locks.expiresAt > new Date()) {
+      return NextResponse.json(
+        { error: "Beat is currently locked by another user" },
+        { status: 409 }
+      );
+    }
+
+    // Update beat
+    const updatedBeat = await prisma.beat.update({
+      where: { id },
+      data: {
+        titulo: data.titulo,
+        contenido: data.contenido,
+        palabras: wordValidation.wordCount,
+        palabrasValidas: wordValidation.isValid,
+        tipo: data.tipo || existingBeat.tipo,
+        personajes: data.personajes ? data.personajes.join(', ') : existingBeat.personajes,
+        emociones: data.emociones ? data.emociones.join(', ') : existingBeat.emociones,
+        conflicto: data.conflicto || existingBeat.conflicto,
+        updatedAt: new Date(),
+      },
+      include: {
+        minuto: {
+          include: {
+            capa: {
+              include: {
+                pelicula: true,
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        action: "BEAT_UPDATED",
+        entity: "BEAT",
+        entityId: id,
+        userId: token.sub,
+        peliculaId: updatedBeat.minuto.capa.peliculaId,
+        newValues: {
+          beatTitulo: data.titulo,
+          wordCount: wordValidation.wordCount,
+          changes: Object.keys(data),
+        },
+      }
+    });
+
+    return NextResponse.json({
+      message: "Beat updated successfully",
+      beat: {
+        id: updatedBeat.id,
+        numero: updatedBeat.numero,
+        titulo: updatedBeat.titulo,
+        contenido: updatedBeat.contenido,
+        palabras: updatedBeat.palabras,
+        palabrasValidas: updatedBeat.palabrasValidas,
+        tipo: updatedBeat.tipo,
+        personajes: updatedBeat.personajes,
+        emociones: updatedBeat.emociones,
+        conflicto: updatedBeat.conflicto,
+        updatedAt: updatedBeat.updatedAt,
+      }
+    });
+
+  } catch (error) {
+    console.error("Error updating beat:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/studio/beats/[id] - Delete beat
+export async function DELETE(req: NextRequest, { params }: RouteParams) {
+  try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token?.sub) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    // Check if beat exists and user has permissions
+    const existingBeat = await prisma.beat.findUnique({
+      where: { id },
+      include: {
+        minuto: {
+          include: {
+            capa: {
+              include: {
+                pelicula: {
+                  include: {
+                    owner: true,
+                    members: true,
+                  }
+                }
+              }
+            }
+          }
+        },
+        locks: true,
+      }
+    });
+
+    if (!existingBeat) {
+      return NextResponse.json({ error: "Beat not found" }, { status: 404 });
+    }
+
+    // Check permissions - only owner or members with appropriate role can delete
+    const project = existingBeat.minuto.capa.pelicula;
+    const isOwner = project.ownerId === token.sub;
+    const member = project.members.find(member => member.userId === token.sub);
+    const canDelete = isOwner || (member && 
+      ['DIRECTOR', 'SUPERVISOR'].includes(member.role));
+
+    if (!canDelete) {
+      return NextResponse.json({ error: "Insufficient permissions to delete beat" }, { status: 403 });
+    }
+
+    // Check if beat is locked by another user
+    const locks = existingBeat.locks as BeatLock | null;
+    if (locks && locks.userId !== token.sub && 
+        locks.expiresAt > new Date()) {
+      return NextResponse.json(
+        { error: "Beat is currently locked by another user" },
+        { status: 409 }
+      );
+    }
+
+    // Delete beat (this will cascade delete locks and comments)
+    await prisma.beat.delete({
+      where: { id }
+    });
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        action: "BEAT_DELETED",
+        entity: "BEAT",
+        entityId: id,
+        userId: token.sub,
+        peliculaId: existingBeat.minuto.capa.peliculaId,
+        oldValues: {
+          beatTitulo: existingBeat.titulo,
+          beatNumero: existingBeat.numero,
+          minutoId: existingBeat.minutoId,
+        },
+      }
+    });
+
+    return NextResponse.json({
+      message: "Beat deleted successfully",
+      beatId: id
+    });
+
+  } catch (error) {
+    console.error("Error deleting beat:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
