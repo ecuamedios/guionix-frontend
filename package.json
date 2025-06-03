@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "SKIP_ENV_VALIDATION=1 next build",
+    "build": "SKIP_ENV_VALIDATION=1 NODE_ENV=production NODE_OPTIONS='--max-old-space-size=4096' next build --no-lint",
     "build:railway": "SKIP_ENV_VALIDATION=1 NODE_ENV=production NODE_OPTIONS='--max-old-space-size=4096' next build --no-lint",
     "build:clean": "rm -rf .next",
     "start": "next start -p ${PORT:-3000}",

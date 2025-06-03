@@ -1,22 +1,19 @@
-# Nixpacks configuration for GUIONIX Next.js app - Optimized for Railway
+# Nixpacks configuration for GUIONIX - Simplified for Railway
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 SKIP_ENV_VALIDATION = "1"
-NIXPACKS_BUILDER = "true"
-DISABLE_DOCKER = "true"
 NODE_OPTIONS = "--max-old-space-size=4096"
-NPM_CONFIG_PROGRESS = "false"
 
 [phases.setup]
 nixPkgs = ["nodejs-18_x", "npm-9_x"]
 
 [phases.install]
-cmd = "npm ci --only=production --ignore-scripts --no-audit --no-fund"
+cmd = "npm ci --omit=dev --ignore-scripts --no-audit --no-fund"
 
 [phases.build]
-cmd = "npm run build:railway"
+cmd = "npm run build"
 dependsOn = ["install"]
 
 [start]

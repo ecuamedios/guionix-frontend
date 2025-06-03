@@ -6,9 +6,8 @@ nixpacksConfigPath = "nixpacks.toml"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicy = "onFailure"
-numReplicas = 1
 
 [env]
 NODE_ENV = "production"
 SKIP_ENV_VALIDATION = "1"
-NIXPACKS_BUILDER = "true"
+NODE_OPTIONS = "--max-old-space-size=4096"
