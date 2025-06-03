@@ -1,4 +1,4 @@
-# Nixpacks configuration for GUIONIX - Railway optimized build
+# Nixpacks configuration for GUIONIX - Optimized for Railway
 providers = ["node"]
 
 [variables]
@@ -10,7 +10,7 @@ NODE_OPTIONS = "--max-old-space-size=1536"
 nixPkgs = ["nodejs_18"]
 
 [phases.install]
-cmd = "npm ci --production=false --maxsockets 1 --no-audit --no-fund --prefer-offline"
+cmd = "npm ci --production=false --prefer-offline --no-audit --no-fund"
 
 [phases.build]
 cmd = "npm run build:railway"
