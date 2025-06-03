@@ -1,8 +1,11 @@
-# Railway ignore file
-# Exclude Docker-related files if any exist
+# Railway ignore file - FORCE NIXPACKS ONLY
+# Aggressively exclude ALL Docker-related files
 **/Dockerfile*
 **/.dockerignore
 **/docker-compose*
+**/docker*
+**/.docker*
+**/Docker*
 
 # Exclude development and cache files
 node_modules/
@@ -30,3 +33,8 @@ prisma/dev.db
 # Exclude documentation
 *.md
 docs/
+
+# Force Nixpacks detection
+!nixpacks.toml
+!.nixpacks/
+!railway.json
