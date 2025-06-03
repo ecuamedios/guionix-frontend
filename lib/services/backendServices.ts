@@ -100,7 +100,7 @@ export const checkServiceHealth = async () => {
   );
 
   return healthChecks.map((result, index) => ({
-    service: services[index].name,
+    serviceName: services[index].name,
     ...(result.status === 'fulfilled' ? result.value : { status: 'error', error: result.reason })
   }));
 };
