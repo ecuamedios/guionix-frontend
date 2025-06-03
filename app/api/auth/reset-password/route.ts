@@ -20,8 +20,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if database is available
+    if (!prisma) {
+      return NextResponse.json(
+        { message: 'Servicio no disponible' },
+        { status: 503 }
+      );
+    }
+
     // Find user by reset token
-    const user = await prisma.user.findFirst({
+    const user = await prisma!.user.findFirst({
       where: {
         // resetToken: token,
         // resetTokenExpiry: {
@@ -44,7 +52,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Update user password and clear reset token
-    await prisma.user.update({
+    await prisma!.user.update({
       where: { id: user.id },
       data: {
         // password: hashedPassword,

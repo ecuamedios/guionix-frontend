@@ -13,8 +13,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if database is available
+    if (!prisma) {
+      return NextResponse.json(
+        { message: 'Si tu email está registrado, recibirás un enlace de recuperación' },
+        { status: 200 }
+      );
+    }
+
     // Check if user exists
-    const user = await prisma.user.findUnique({
+    const user = await prisma!.user.findUnique({
       where: { email },
     });
 
@@ -26,7 +34,7 @@ export async function POST(request: NextRequest) {
       const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
 
       // Save reset token to database
-      await prisma.user.update({
+      await prisma!.user.update({
         where: { email },
         data: {
           // resetToken,
