@@ -16,9 +16,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es" className="dark" suppressHydrationWarning>
       <head />
-      <body className={`${inter.className} bg-slate-900 text-white antialiased`}>
+      <body className={`${inter.className} bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white antialiased transition-colors duration-300`}>
         <SessionProvider>
           <div className="min-h-screen">
             {children}
