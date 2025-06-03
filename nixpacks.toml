@@ -1,12 +1,16 @@
-# Nixpacks configuration for GUIONIX
+# Nixpacks configuration for GUIONIX Next.js app
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 SKIP_ENV_VALIDATION = "1"
+NPM_CONFIG_INCLUDE = "optional"
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
 
 [phases.install]
-cmd = "npm ci"
+cmd = "npm ci --only=production --ignore-scripts"
 
 [phases.build]
 cmd = "npm run build:railway"
