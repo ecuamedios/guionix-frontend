@@ -1,19 +1,19 @@
-# Nixpacks configuration for GUIONIX - Simplified for Railway
+# Nixpacks configuration for GUIONIX - Memory optimized for Railway
 providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 SKIP_ENV_VALIDATION = "1"
-NODE_OPTIONS = "--max-old-space-size=4096"
+NODE_OPTIONS = "--max-old-space-size=2048 --optimize-for-size"
 
 [phases.setup]
-nixPkgs = ["nodejs-18_x", "npm-9_x"]
+nixPkgs = ["nodejs_18"]
 
 [phases.install]
-cmd = "npm ci --omit=dev --ignore-scripts --no-audit --no-fund"
+cmd = "npm ci --production=false --maxsockets 1 --no-audit --no-fund"
 
 [phases.build]
-cmd = "npm run build"
+cmd = "npm run build:railway"
 dependsOn = ["install"]
 
 [start]
