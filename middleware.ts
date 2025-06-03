@@ -20,6 +20,7 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/reset-password",
+  "/landing", // Public landing page
   "/dev-dashboard", // Development only
   "/dev-login", // Development only
   "/simple-login", // Development only
@@ -32,8 +33,7 @@ export async function middleware(req: NextRequest) {
   if (
     PUBLIC_PATHS.includes(pathname) ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/health") ||
-    pathname === "/" // Landing page is public
+    pathname.startsWith("/api/health")
   ) {
     return NextResponse.next();
   }
@@ -41,9 +41,13 @@ export async function middleware(req: NextRequest) {
   // Get session token
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // Protect all routes except login/register and landing page
+  // Protect all routes except login/register - INCLUDING root path
   if (!token) {
-    // If trying to access protected route without session, redirect to login
+    // If accessing root without session, redirect to landing page
+    if (pathname === "/") {
+      return NextResponse.redirect(new URL("/landing", req.url));
+    }
+    // Otherwise redirect to login for protected routes
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
