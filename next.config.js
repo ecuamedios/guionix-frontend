@@ -36,6 +36,19 @@ const nextConfig = {
     
     // Limit concurrent builds
     config.parallelism = 1;
+
+    // Ensure TypeScript files are handled correctly
+    config.module.rules.push({
+      test: /\.tsx?$/,
+      use: [
+        {
+          loader: 'ts-loader',
+          options: {
+            transpileOnly: true,
+          },
+        },
+      ],
+    });
     
     return config;
   },
