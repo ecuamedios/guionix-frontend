@@ -1,0 +1,32 @@
+# Railway ignore file
+# Exclude Docker-related files if any exist
+**/Dockerfile*
+**/.dockerignore
+**/docker-compose*
+
+# Exclude development and cache files
+node_modules/
+.next/
+.env.local
+.env.development
+*.log
+.DS_Store
+
+# Exclude build artifacts that shouldn't be deployed
+.vercel/
+.turbo/
+coverage/
+
+# Exclude local database
+prisma/dev.db
+*.db
+
+# Exclude test files
+**/*.test.*
+**/*.spec.*
+**/test/
+**/tests/
+
+# Exclude documentation
+*.md
+docs/

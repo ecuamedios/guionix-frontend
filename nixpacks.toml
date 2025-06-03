@@ -1,0 +1,23 @@
+# Nixpacks configuration for GUIONIX
+[providers]
+node = "18"
+
+[variables]
+NODE_ENV = "production"
+SKIP_ENV_VALIDATION = "1"
+
+[build]
+cmd = "npm install && npm run build:railway"
+
+[start]
+cmd = "npm start"
+
+[phases.setup]
+dependsOn = ["install"]
+
+[phases.install]
+cmd = "npm ci --only=production"
+
+[phases.build]
+cmd = "npm run build:railway"
+dependsOn = ["install"]
