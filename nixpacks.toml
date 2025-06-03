@@ -4,7 +4,7 @@ providers = ["node"]
 [variables]
 NODE_ENV = "production"
 SKIP_ENV_VALIDATION = "1"
-NODE_OPTIONS = "--max-old-space-size=2048 --optimize-for-size"
+NODE_OPTIONS = "--max-old-space-size=2048"
 
 [phases.setup]
 nixPkgs = ["nodejs_18"]

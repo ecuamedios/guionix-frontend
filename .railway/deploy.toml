@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+nixpacksConfigPath = "nixpacks.toml"
+
+[env]
+NODE_ENV = "production"
+SKIP_ENV_VALIDATION = "1"
+NODE_OPTIONS = "--max-old-space-size=2048"
+NIXPACKS_BUILDER = "true"
