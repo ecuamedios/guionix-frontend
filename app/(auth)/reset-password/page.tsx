@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import Link from "next/link";
 import { Film } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Restablecer contraseña | GUIONIX",
   description: "Establece una nueva contraseña para tu cuenta de GUIONIX.",
   robots: "noindex, nofollow",
 };
 
-interface ResetPasswordPageProps {
-  searchParams: { token?: string };
-}
-
-export default function ResetPasswordPage({ searchParams }: ResetPasswordPageProps) {
+export default function ResetPasswordPage({ searchParams }: { searchParams: { token?: string } }) {
   const { token } = searchParams;
 
   if (!token) {

@@ -1,10 +1,9 @@
 // app/(auth)/register/page.tsx
-import type { Metadata } from "next";
 import RegisterForm from "@/components/auth/RegisterForm";
 import Link from "next/link";
 import { Film } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Registro | GUIONIX",
   description: "Crea tu cuenta en GUIONIX para comenzar a escribir guiones profesionales con IA.",
   robots: "index, follow",

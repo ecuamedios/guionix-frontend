@@ -1,9 +1,8 @@
-import type { Metadata } from "next";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import Link from "next/link";
 import { Film } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Recuperar contraseña | GUIONIX",
   description: "Recupera tu contraseña de GUIONIX para volver a acceder a tu cuenta.",
   robots: "index, follow",

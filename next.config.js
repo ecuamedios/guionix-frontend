@@ -1,62 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove standalone output for Railway deployment
-  // output: 'standalone',
+  output: 'standalone',
   
-  // Skip type checking and linting during build for now
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  serverExternalPackages: ['@prisma/client'],
   
-  // Build optimizations for Railway
-  swcMinify: true,
-  compress: false, // Disable compression to save memory during build
-  poweredByHeader: false,
-  generateEtags: false,
-  
-  // Webpack optimizations for low memory environments
-  webpack: (config, { isServer }) => {
-    // Reduce memory usage during compilation
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-        },
-      },
-    };
-    
-    // Limit concurrent builds
-    config.parallelism = 1;
-
-    // Ensure TypeScript files are handled correctly
-    config.module.rules.push({
-      test: /\.tsx?$/,
-      use: [
-        {
-          loader: 'ts-loader',
-          options: {
-            transpileOnly: true,
-          },
-        },
-      ],
-    });
-    
-    return config;
-  },
-  
+  // Deshabilitar experimentos que pueden causar problemas
   experimental: {
+    craCompat: false,
     esmExternals: false,
-    // Reduce memory usage
-    craCompat: true,
   },
   
   images: {
@@ -70,24 +21,6 @@ const nextConfig = {
   
   async rewrites() {
     return [
-      // Proxy para servicios backend
-      {
-        source: '/api/backend/brain/:path*',
-        destination: 'https://guionix-brain-production.up.railway.app/api/:path*'
-      },
-      {
-        source: '/api/backend/ai-orchestrator/:path*',
-        destination: 'https://guionix-ai-orchestrator-production.up.railway.app/api/:path*'
-      },
-      {
-        source: '/api/backend/script-engine/:path*',
-        destination: 'https://guionix-script-engine-production.up.railway.app/api/:path*'
-      },
-      {
-        source: '/api/backend/export-engine/:path*',
-        destination: 'https://guionix-export-engine-production.up.railway.app/api/:path*'
-      },
-      // Legacy external API route
       {
         source: '/api/external/:path*',
         destination: '/api/external/:path*'
@@ -105,26 +38,25 @@ const nextConfig = {
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
         ],
       },
-      // Headers específicos para servicios backend
-      {
-        source: '/api/backend/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, X-API-Key' },
-          { key: 'X-Guionix-Frontend', value: 'true' },
-        ],
-      },
     ];
   },
-
-  // Variables de entorno para el build
-  env: {
-    GUIONIX_BRAIN_URL: process.env.GUIONIX_BRAIN_URL,
-    GUIONIX_AI_ORCHESTRATOR_URL: process.env.GUIONIX_AI_ORCHESTRATOR_URL,
-    GUIONIX_SCRIPT_ENGINE_URL: process.env.GUIONIX_SCRIPT_ENGINE_URL,
-    GUIONIX_EXPORT_ENGINE_URL: process.env.GUIONIX_EXPORT_ENGINE_URL,
-  }
+  
+  webpack(config) {
+    // Deshabilitar next-flight-loader que causa problemas con TypeScript
+    config.module.rules = config.module.rules.map((rule) => {
+      if (rule.use && Array.isArray(rule.use)) {
+        rule.use = rule.use.filter((loader) => {
+          if (typeof loader === 'object' && loader.loader) {
+            return !loader.loader.includes('next-flight-loader');
+          }
+          return true;
+        });
+      }
+      return rule;
+    });
+    
+    return config;
+  },
 }
 
 module.exports = nextConfig

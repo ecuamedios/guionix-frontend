@@ -1,9 +1,8 @@
-import type { Metadata } from "next";
 import LoginForm from "@/components/auth/LoginForm";
 import Link from "next/link";
 import { Film } from "lucide-react";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Iniciar sesión | GUIONIX",
   description: "Accede a GUIONIX para crear y gestionar tus guiones de cine y TV con IA.",
   robots: "index, follow",

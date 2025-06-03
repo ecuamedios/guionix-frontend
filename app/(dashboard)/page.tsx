@@ -53,7 +53,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import NotificationCenter from "@/components/dashboard/NotificationCenter";
-import { useToast, ToastContainer } from "@/components/ui/toast";
+import { useToast, ToastContainer } from "@/components/ui/Toast";
 
 interface Project {
   id: string;

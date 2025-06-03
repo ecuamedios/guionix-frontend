@@ -1,8 +1,7 @@
-import type { ReactNode } from "react";
 import { Film } from "lucide-react";
 import Link from "next/link";
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-black via-gray-900 to-gray-800 relative">
       {/* Film/cinema themed background */}
