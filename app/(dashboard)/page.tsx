@@ -19,7 +19,11 @@ import {
   Play,
   Settings,
   Bell,
-  Search
+  Search,
+  Sparkles,
+  Zap,
+  Target,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,158 +34,136 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface Project {
   id: string;
   title: string;
-  genre: string;
+  status: 'draft' | 'in-progress' | 'review' | 'completed';
   progress: number;
-  lastModified: Date;
-  status: 'draft' | 'in-progress' | 'completed';
   collaborators: number;
+  lastModified: string;
   beats: number;
   wordCount: number;
+  genre: string;
 }
 
 interface DashboardStats {
   totalProjects: number;
-  activeProjects: number;
-  completedProjects: number;
-  totalWords: number;
-  aiGenerations: number;
-  collaborations: number;
+  activeCollaborators: number;
+  scriptsInProgress: number;
+  hoursThisWeek: number;
+  completionRate: number;
+  activeDeadlines: number;
 }
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalProjects: 12,
-    activeProjects: 8,
-    completedProjects: 4,
-    totalWords: 45280,
-    aiGenerations: 156,
-    collaborations: 23
-  });
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock projects data
-  useEffect(() => {
-    setProjects([
-      {
-        id: '1',
-        title: 'El Último Algoritmo',
-        genre: 'Sci-Fi Thriller',
-        progress: 75,
-        lastModified: new Date(),
-        status: 'in-progress',
-        collaborators: 3,
-        beats: 12,
-        wordCount: 8950
-      },
-      {
-        id: '2',
-        title: 'Sombras del Pasado',
-        genre: 'Drama Psicológico',
-        progress: 45,
-        lastModified: new Date(Date.now() - 86400000),
-        status: 'in-progress',
-        collaborators: 2,
-        beats: 8,
-        wordCount: 5420
-      },
-      {
-        id: '3',
-        title: 'Código Rojo',
-        genre: 'Acción',
-        progress: 100,
-        lastModified: new Date(Date.now() - 172800000),
-        status: 'completed',
-        collaborators: 1,
-        beats: 15,
-        wordCount: 12500
-      },
-      {
-        id: '4',
-        title: 'La Casa del Lago',
-        genre: 'Terror',
-        progress: 20,
-        lastModified: new Date(Date.now() - 259200000),
-        status: 'draft',
-        collaborators: 4,
-        beats: 3,
-        wordCount: 1200
-      }
-    ]);
-  }, []);
+  const stats: DashboardStats = {
+    totalProjects: 24,
+    activeCollaborators: 8,
+    scriptsInProgress: 12,
+    hoursThisWeek: 32,
+    completionRate: 85,
+    activeDeadlines: 3
+  };
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
+  const projects: Project[] = [
+    {
+      id: "1",
+      title: "Ecos del Algoritmo",
+      status: 'in-progress',
+      progress: 67,
+      collaborators: 3,
+      lastModified: "Hace 2 horas",
+      beats: 24,
+      wordCount: 28500,
+      genre: "Thriller Tech"
+    },
+    {
+      id: "2", 
+      title: "La Última Transmisión",
+      status: 'review',
+      progress: 95,
+      collaborators: 2,
+      lastModified: "Hace 1 día",
+      beats: 30,
+      wordCount: 35200,
+      genre: "Sci-Fi Drama"
+    },
+    {
+      id: "3",
+      title: "Memorias Sintéticas",
+      status: 'draft',
+      progress: 25,
+      collaborators: 1,
+      lastModified: "Hace 3 días",
+      beats: 8,
+      wordCount: 12400,
+      genre: "Cyberpunk"
     }
-  }, [status, router]);
+  ];
 
-  if (status === "loading") {
+  useEffect(() => {
+    if (!session) {
+      router.push('/auth/signin');
+    }
+  }, [session, router]);
+
+  if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-gray-800">
-        <div className="flex flex-col items-center space-y-4">
-          <Film className="w-12 h-12 text-yellow-400 animate-pulse" />
-          <p className="text-white text-lg">Cargando GUIONIX...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <p className="text-gray-400">Cargando...</p>
         </div>
       </div>
     );
   }
 
-  if (!session) {
-    return null;
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'in-progress': return 'bg-yellow-500';
-      case 'draft': return 'bg-gray-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed': return 'Completado';
-      case 'in-progress': return 'En Progreso';
-      case 'draft': return 'Borrador';
-      default: return 'Desconocido';
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-900">
+      {/* Header mejorado */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/50 border-b border-white/10 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             <div className="flex items-center space-x-4">
-              <Film className="w-8 h-8 text-yellow-400" />
-              <h1 className="text-2xl font-bold text-white">GUIONIX</h1>
-              <Badge variant="outline" className="text-yellow-400 border-yellow-400">
-                Professional
-              </Badge>
+              <div className="p-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg">
+                <Film className="w-8 h-8 text-black" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  GUIONIX
+                </h1>
+                <p className="text-sm text-gray-400 flex items-center">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  AI-Powered Screenwriting
+                </p>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input 
-                  placeholder="Buscar proyectos..." 
-                  className="pl-10 w-64 bg-gray-800 border-gray-700 text-white"
+            {/* Search bar modernizado */}
+            <div className="hidden md:flex flex-1 max-w-md mx-8">
+              <div className="relative w-full">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Buscar proyectos, colaboradores..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 bg-slate-800/50 border-white/20 text-white placeholder:text-gray-500 focus:border-yellow-400 focus:ring-yellow-400/20 rounded-xl"
                 />
               </div>
-              <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white">
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <Button size="sm" variant="ghost" className="relative text-gray-400 hover:text-white">
                 <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
               </Button>
               <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white">
                 <Settings className="w-5 h-5" />
               </Button>
-              <Avatar>
-                <AvatarImage src="/placeholder-avatar.jpg" />
-                <AvatarFallback className="bg-yellow-500 text-black">
+              <Avatar className="h-10 w-10 ring-2 ring-yellow-400/50">
+                <AvatarFallback className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold">
                   {session.user?.name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -191,171 +173,208 @@ export default function DashboardPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
+        {/* Welcome Section mejorado */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Bienvenido de nuevo, {session.user?.name || 'Guionista'}
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3">
+            Bienvenido de nuevo, {session.user?.name?.split(' ')[0] || 'Guionista'}
           </h2>
-          <p className="text-gray-400 text-lg">
+          <p className="text-xl text-gray-400 flex items-center">
+            <Zap className="w-5 h-5 mr-2 text-yellow-400" />
             Continúa creando historias extraordinarias con el poder de la IA
           </p>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid modernizado */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">Total Proyectos</CardTitle>
-              <FileText className="h-4 w-4 text-yellow-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalProjects}</div>
-              <p className="text-xs text-gray-400">+2 este mes</p>
+          <Card className="bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Proyectos</p>
+                  <p className="text-3xl font-bold text-white">{stats.totalProjects}</p>
+                </div>
+                <div className="p-3 bg-blue-500/20 rounded-xl">
+                  <FileText className="w-6 h-6 text-blue-400" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">En Progreso</CardTitle>
-              <Activity className="h-4 w-4 text-blue-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.activeProjects}</div>
-              <p className="text-xs text-gray-400">+1 esta semana</p>
+          <Card className="bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Colaboradores</p>
+                  <p className="text-3xl font-bold text-white">{stats.activeCollaborators}</p>
+                </div>
+                <div className="p-3 bg-green-500/20 rounded-xl">
+                  <Users className="w-6 h-6 text-green-400" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">Completados</CardTitle>
-              <Award className="h-4 w-4 text-green-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.completedProjects}</div>
-              <p className="text-xs text-gray-400">+1 este mes</p>
+          <Card className="bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">En Progreso</p>
+                  <p className="text-3xl font-bold text-white">{stats.scriptsInProgress}</p>
+                </div>
+                <div className="p-3 bg-orange-500/20 rounded-xl">
+                  <Edit3 className="w-6 h-6 text-orange-400" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">Palabras Totales</CardTitle>
-              <TrendingUp className="h-4 w-4 text-purple-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.totalWords.toLocaleString()}</div>
-              <p className="text-xs text-gray-400">+1.2k esta semana</p>
+          <Card className="bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Horas/Semana</p>
+                  <p className="text-3xl font-bold text-white">{stats.hoursThisWeek}</p>
+                </div>
+                <div className="p-3 bg-purple-500/20 rounded-xl">
+                  <Clock className="w-6 h-6 text-purple-400" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">IA Generaciones</CardTitle>
-              <Star className="h-4 w-4 text-yellow-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.aiGenerations}</div>
-              <p className="text-xs text-gray-400">+12 hoy</p>
+          <Card className="bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Completados</p>
+                  <p className="text-3xl font-bold text-white">{stats.completionRate}%</p>
+                </div>
+                <div className="p-3 bg-yellow-500/20 rounded-xl">
+                  <TrendingUp className="w-6 h-6 text-yellow-400" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">Colaboradores</CardTitle>
-              <Users className="h-4 w-4 text-indigo-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{stats.collaborations}</div>
-              <p className="text-xs text-gray-400">+3 este mes</p>
+          <Card className="bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm font-medium">Deadlines</p>
+                  <p className="text-3xl font-bold text-white">{stats.activeDeadlines}</p>
+                </div>
+                <div className="p-3 bg-red-500/20 rounded-xl">
+                  <Calendar className="w-6 h-6 text-red-400" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions mejorado */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-white mb-4">Acciones Rápidas</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Target className="w-6 h-6 mr-3 text-yellow-400" />
+            Acciones Rápidas
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Button 
-              className="h-20 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              className="h-24 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold text-lg shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 transform hover:scale-105"
               onClick={() => router.push('/studio/new')}
             >
-              <Plus className="w-6 h-6 mr-2" />
-              Nuevo Guión
+              <div className="flex flex-col items-center">
+                <Plus className="w-8 h-8 mb-2" />
+                <span>Nuevo Guión</span>
+              </div>
             </Button>
             <Button 
               variant="outline" 
-              className="h-20 border-gray-600 text-white hover:bg-gray-800"
+              className="h-24 border-white/20 text-white hover:bg-slate-800/50 backdrop-blur-xl font-semibold text-lg"
               onClick={() => router.push('/projects')}
             >
-              <FileText className="w-6 h-6 mr-2" />
-              Ver Proyectos
+              <div className="flex flex-col items-center">
+                <FileText className="w-8 h-8 mb-2" />
+                <span>Ver Proyectos</span>
+              </div>
             </Button>
             <Button 
               variant="outline" 
-              className="h-20 border-gray-600 text-white hover:bg-gray-800"
+              className="h-24 border-white/20 text-white hover:bg-slate-800/50 backdrop-blur-xl font-semibold text-lg"
               onClick={() => router.push('/studio')}
             >
-              <Edit3 className="w-6 h-6 mr-2" />
-              Editor Studio
+              <div className="flex flex-col items-center">
+                <Edit3 className="w-8 h-8 mb-2" />
+                <span>Editor Studio</span>
+              </div>
             </Button>
             <Button 
               variant="outline" 
-              className="h-20 border-gray-600 text-white hover:bg-gray-800"
+              className="h-24 border-white/20 text-white hover:bg-slate-800/50 backdrop-blur-xl font-semibold text-lg"
               onClick={() => router.push('/integration-dashboard')}
             >
-              <Activity className="w-6 h-6 mr-2" />
-              Sistema Status
+              <div className="flex flex-col items-center">
+                <Activity className="w-8 h-8 mb-2" />
+                <span>Sistema Status</span>
+              </div>
             </Button>
           </div>
         </div>
 
-        {/* Recent Projects */}
+        {/* Recent Projects mejorado */}
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-white">Proyectos Recientes</h3>
-            <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
+            <h3 className="text-2xl font-bold text-white flex items-center">
+              <BarChart3 className="w-6 h-6 mr-3 text-yellow-400" />
+              Proyectos Recientes
+            </h3>
+            <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-slate-800/50">
               Ver Todos
             </Button>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {projects.map((project) => (
-              <Card key={project.id} className="bg-gray-800 border-gray-700 hover:border-yellow-400 transition-colors cursor-pointer">
+              <Card key={project.id} className="bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 group">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-white text-lg">{project.title}</CardTitle>
-                    <Badge className={`${getStatusColor(project.status)} text-white`}>
-                      {getStatusText(project.status)}
+                    <CardTitle className="text-white text-lg group-hover:text-yellow-400 transition-colors">{project.title}</CardTitle>
+                    <Badge 
+                      className={`
+                        ${project.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : ''}
+                        ${project.status === 'in-progress' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : ''}
+                        ${project.status === 'review' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : ''}
+                        ${project.status === 'draft' ? 'bg-gray-500/20 text-gray-400 border-gray-500/30' : ''}
+                        backdrop-blur-sm border
+                      `}
+                    >
+                      {project.status === 'completed' && 'Completado'}
+                      {project.status === 'in-progress' && 'En Progreso'}
+                      {project.status === 'review' && 'En Revisión'}
+                      {project.status === 'draft' && 'Borrador'}
                     </Badge>
                   </div>
-                  <CardDescription className="text-gray-400">{project.genre}</CardDescription>
+                  <CardDescription className="text-gray-400">
+                    {project.genre} • {project.lastModified}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm text-gray-400 mb-1">
-                        <span>Progreso</span>
-                        <span>{project.progress}%</span>
-                      </div>
-                      <div className="w-full bg-gray-700 rounded-full h-2">
-                        <div 
-                          className="bg-yellow-400 h-2 rounded-full" 
-                          style={{ width: `${project.progress}%` }}
-                        ></div>
-                      </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Progreso</span>
+                      <span className="text-white font-semibold">{project.progress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${project.progress}%` }}
+                      ></div>
                     </div>
                     
-                    <div className="flex justify-between text-sm text-gray-400">
-                      <span className="flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {new Date(project.lastModified).toLocaleDateString()}
-                      </span>
+                    <div className="flex items-center justify-between text-sm text-gray-400">
                       <span className="flex items-center">
                         <Users className="w-4 h-4 mr-1" />
                         {project.collaborators}
                       </span>
-                    </div>
-                    
-                    <div className="flex justify-between text-sm text-gray-400">
                       <span>{project.beats} beats</span>
                       <span>{project.wordCount.toLocaleString()} palabras</span>
                     </div>
@@ -363,7 +382,7 @@ export default function DashboardPage() {
                     <div className="flex space-x-2 pt-2">
                       <Button 
                         size="sm" 
-                        className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black"
+                        className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-semibold"
                         onClick={() => router.push(`/studio/${project.id}`)}
                       >
                         <Edit3 className="w-4 h-4 mr-1" />
@@ -372,17 +391,10 @@ export default function DashboardPage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="border-gray-600 text-gray-300"
+                        className="border-white/20 text-gray-300 hover:bg-slate-800/50"
                         onClick={() => router.push(`/studio/${project.id}/preview`)}
                       >
                         <Play className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="border-gray-600 text-gray-300"
-                      >
-                        <Download className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
