@@ -35,7 +35,7 @@ async function createTestUser() {
   console.log('🏠 Home: https://guionix.com/');
   console.log('🔑 Login: https://guionix.com/login');
   console.log('📊 Dashboard: https://guionix.com/projects');
-  console.log('🎬 Studio: https://guionix.com/studio/new');
+  console.log('🎬 Studio: https://guionix.com/studio?mode=new');
   console.log('🔧 Health: https://guionix.com/api/health');
   console.log('=====================================\n');
   

@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 // --- Types ---
 export interface AuthUser {
   id: string;
+  name?: string;
   email: string;
+  image?: string;
   role: UserRole;
   permissions: Permission[];
 }
@@ -21,7 +23,10 @@ export function useAuth() {
     (provider: "credentials" | "google", options?: any) => signIn(provider, options),
     []
   );
-  const logout = useCallback(() => signOut(), []);
+  
+  const logout = useCallback(async () => {
+    await signOut({ callbackUrl: '/login' });
+  }, []);
 
   const refreshSession = useCallback(() => update(), [update]);
 
@@ -29,6 +34,7 @@ export function useAuth() {
     (role: UserRole) => user && user.role === role,
     [user]
   );
+  
   const hasPerm = useCallback(
     (perm: Permission) => user && user.permissions && user.permissions.includes(perm),
     [user]

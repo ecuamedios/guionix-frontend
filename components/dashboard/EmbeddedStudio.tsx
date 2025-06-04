@@ -53,7 +53,7 @@ export default function EmbeddedStudio({ className = "" }: EmbeddedStudioProps) 
       icon: Lightbulb,
       color: "from-blue-500 to-purple-600",
       estimatedTime: "45-60 min",
-      action: () => router.push("/studio/new/phase/1")
+      action: () => router.push("/studio?mode=new&phase=1")
     },
     {
       id: "new-expert",
@@ -279,7 +279,7 @@ export default function EmbeddedStudio({ className = "" }: EmbeddedStudioProps) 
                 className="h-20 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white flex flex-col items-center justify-center space-y-1"
                 onClick={() => {
                   setShowQuickStart(false);
-                  router.push("/studio/new/phase/1");
+                  router.push("/studio?mode=new&phase=1");
                 }}
               >
                 <Target className="w-5 h-5" />

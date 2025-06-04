@@ -28,7 +28,7 @@ fi
 
 # Test script creation workflow
 echo "📝 Testing script creation workflow..."
-WORKFLOW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/studio/new")
+WORKFLOW_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/studio?mode=new")
 if [ "$WORKFLOW_STATUS" = "200" ]; then
     echo "✅ Script creation workflow is accessible (Status: $WORKFLOW_STATUS)"
 else
@@ -38,7 +38,7 @@ fi
 # Test each phase
 for phase in 1 2 3 4; do
     echo "🔄 Testing Phase $phase..."
-    PHASE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/studio/new/phase/$phase")
+    PHASE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PROD_URL/studio?mode=new/phase/$phase")
     if [ "$PHASE_STATUS" = "200" ]; then
         echo "✅ Phase $phase is accessible (Status: $PHASE_STATUS)"
     else
@@ -58,7 +58,7 @@ fi
 echo ""
 echo "🎬 SCRIPT CREATION WORKFLOW VERIFICATION"
 echo "========================================"
-echo "✅ Dashboard 'Crear Guión' button → /studio/new"
+echo "✅ Dashboard 'Crear Guión' button → /studio?mode=new"
 echo "✅ Phase 1: Idea Generation with X.AI/Grok"
 echo "✅ Phase 2: Structure Development with ChatGPT-4"
 echo "✅ Phase 3: Professional Writing with Claude AI"

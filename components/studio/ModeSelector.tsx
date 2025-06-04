@@ -32,7 +32,11 @@ interface ModeOption {
   skillLevel: 'beginner' | 'intermediate' | 'expert';
 }
 
-export default function ModeSelector() {
+interface ModeSelectorProps {
+  onStartNewProject?: () => void;
+}
+
+export default function ModeSelector({ onStartNewProject }: ModeSelectorProps) {
   const { switchMode, userProfile } = useStudioMode();
   const router = useRouter();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
@@ -123,10 +127,16 @@ export default function ModeSelector() {
   const handleModeSelect = (mode: ModeOption) => {
     setSelectedMode(mode.id);
     
-    // Actualizar perfil del usuario
-    if (mode.id === 'expert') {
-      userProfile && switchMode('expert');
+    if (mode.id === 'new') {
+      // Usar la función del padre para iniciar nuevo proyecto (que incluye navegación)
+      if (onStartNewProject) {
+        onStartNewProject();
+      } else {
+        // Fallback: navegar directamente
+        switchMode('new');
+      }
     } else {
+      // Para otros modos, usar switchMode normal
       switchMode(mode.id);
     }
   };
@@ -201,149 +211,117 @@ export default function ModeSelector() {
             return (
               <Card 
                 key={mode.id}
-                className={`relative overflow-hidden transition-all duration-300 cursor-pointer transform hover:scale-[1.02] ${
+                className={`relative overflow-hidden transition-all duration-300 cursor-pointer group ${
                   isSelected 
-                    ? 'bg-blue-500/20 border-blue-500 shadow-xl shadow-blue-500/25' 
+                    ? 'bg-gradient-to-br from-blue-500/30 to-purple-500/30 border-blue-500 scale-105' 
                     : isRecommended
-                      ? 'bg-yellow-500/10 border-yellow-500/50 hover:border-yellow-500'
-                      : 'bg-slate-900/50 border-white/10 hover:border-white/20'
+                      ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/50 hover:scale-105'
+                      : 'bg-gray-900/50 border-gray-700 hover:border-gray-600 hover:scale-105'
                 } backdrop-blur-xl`}
                 onClick={() => handleModeSelect(mode)}
               >
+                {/* Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                {/* Recommended Badge */}
                 {isRecommended && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-l from-yellow-500 to-orange-500 text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
-                    RECOMENDADO
+                  <div className="absolute top-4 right-4 z-10">
+                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/50">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Recomendado
+                    </Badge>
                   </div>
                 )}
                 
                 <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-3 rounded-xl ${
-                      isSelected 
-                        ? 'bg-blue-500/20' 
-                        : isRecommended 
-                          ? 'bg-yellow-500/20'
-                          : 'bg-white/5'
+                  <div className="flex items-center gap-4">
+                    <div className={`p-4 rounded-2xl transition-colors ${
+                      isSelected
+                        ? 'bg-blue-500 text-white'
+                        : isRecommended
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-gray-800 text-gray-300 group-hover:bg-gray-700'
                     }`}>
-                      <Icon className={`w-8 h-8 ${
-                        isSelected 
-                          ? 'text-blue-400' 
-                          : isRecommended 
-                            ? 'text-yellow-400'
-                            : 'text-white/70'
-                      }`} />
+                      <Icon className="w-8 h-8" />
                     </div>
-                    
-                    <Badge variant="outline" className={`text-xs ${
-                      mode.skillLevel === 'beginner' 
-                        ? 'border-green-400/50 text-green-400'
-                        : mode.skillLevel === 'intermediate'
-                          ? 'border-yellow-400/50 text-yellow-400'
-                          : 'border-red-400/50 text-red-400'
-                    }`}>
-                      {mode.skillLevel === 'beginner' ? 'Principiante' :
-                       mode.skillLevel === 'intermediate' ? 'Intermedio' : 'Experto'}
-                    </Badge>
+                    <div className="flex-1">
+                      <CardTitle className="text-xl text-white mb-1">
+                        {mode.title}
+                      </CardTitle>
+                      <div className="flex items-center gap-4 text-sm text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Brain className="w-3 h-3" />
+                          {mode.aiProvider}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Zap className="w-3 h-3" />
+                          {mode.estimatedTime}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <CardTitle className="text-xl text-white mb-2">
-                    {mode.title}
-                  </CardTitle>
-                  
-                  <CardDescription className="text-white/70 text-sm leading-relaxed">
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  <CardDescription className="text-gray-300 text-base">
                     {mode.description}
                   </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  {/* Features */}
-                  <div className="space-y-2 mb-4">
-                    {mode.features.slice(0, 3).map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm text-white/80">
-                        <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      Características principales:
+                    </h4>
+                    <ul className="space-y-1">
+                      {mode.features.map((feature, index) => (
+                        <li key={index} className="text-sm text-gray-400 flex items-start gap-2">
+                          <CheckCircle className="w-3 h-3 mt-0.5 text-green-400 flex-shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  
-                  {/* Meta Info */}
-                  <div className="space-y-2 text-xs text-white/60">
-                    <div className="flex items-center justify-between">
-                      <span>IA:</span>
-                      <span className="text-blue-400">{mode.aiProvider}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Tiempo:</span>
-                      <span className="text-white/80">{mode.estimatedTime}</span>
-                    </div>
+
+                  <div className="pt-4 border-t border-gray-700">
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleModeSelect(mode);
+                      }}
+                      className={`w-full ${
+                        isSelected
+                          ? 'bg-blue-600 hover:bg-blue-700'
+                          : isRecommended
+                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black'
+                            : 'bg-gray-700 hover:bg-gray-600'
+                      } font-semibold transition-all`}
+                    >
+                      {isSelected ? 'Seleccionado' : 'Elegir este modo'}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
                   </div>
-                  
-                  {/* Action Button */}
-                  <Button 
-                    className={`w-full mt-4 font-semibold ${
-                      isSelected
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                        : isRecommended
-                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black'
-                          : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleModeSelect(mode);
-                    }}
-                  >
-                    {isSelected ? (
-                      <>
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Seleccionado
-                      </>
-                    ) : (
-                      <>
-                        Seleccionar
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </>
-                    )}
-                  </Button>
                 </CardContent>
               </Card>
             );
           })}
         </div>
 
-        {/* Features Highlight */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-slate-900/50 border-white/10 backdrop-blur-xl">
-            <CardContent className="pt-6 text-center">
-              <div className="p-3 bg-blue-500/20 rounded-full w-fit mx-auto mb-4">
-                <Brain className="w-6 h-6 text-blue-400" />
+        {/* Footer Info */}
+        <div className="text-center">
+          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-xl max-w-2xl mx-auto">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="p-2 bg-blue-500/20 rounded-full">
+                  <Brain className="w-5 h-5 text-blue-400" />
+                </div>
+                <span className="text-blue-400 font-semibold">Powered by AI</span>
               </div>
-              <h3 className="text-white font-semibold mb-2">IA Multicapa</h3>
-              <p className="text-white/70 text-sm">
-                Diferentes modelos especializados para cada fase del proceso creativo
+              <p className="text-gray-300 mb-3">
+                Todos los modos incluyen acceso completo a nuestro ecosistema de IA: 
+                X.AI/Grok, ChatGPT-4, Claude y nuestro sistema híbrido de control de calidad.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-900/50 border-white/10 backdrop-blur-xl">
-            <CardContent className="pt-6 text-center">
-              <div className="p-3 bg-green-500/20 rounded-full w-fit mx-auto mb-4">
-                <Target className="w-6 h-6 text-green-400" />
-              </div>
-              <h3 className="text-white font-semibold mb-2">Control de Calidad</h3>
-              <p className="text-white/70 text-sm">
-                Validación profesional en cada paso para garantizar máxima calidad
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-900/50 border-white/10 backdrop-blur-xl">
-            <CardContent className="pt-6 text-center">
-              <div className="p-3 bg-purple-500/20 rounded-full w-fit mx-auto mb-4">
-                <Zap className="w-6 h-6 text-purple-400" />
-              </div>
-              <h3 className="text-white font-semibold mb-2">Profesional</h3>
-              <p className="text-white/70 text-sm">
-                Formato estándar de la industria compatible con Final Draft
+              <p className="text-sm text-gray-400">
+                Puedes cambiar entre modos en cualquier momento sin perder tu progreso.
               </p>
             </CardContent>
           </Card>

@@ -160,7 +160,7 @@ export default function ModernDashboardPage() {
     {
       name: "Create New",
       icon: Plus,
-      href: "/studio/new/phase/1"
+      href: "/studio?mode=new&phase=1"
     },
     {
       name: "Teams",

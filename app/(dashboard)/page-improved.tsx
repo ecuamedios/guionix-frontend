@@ -143,7 +143,7 @@ export default function DashboardPage() {
     {
       name: "Crear nuevo guión",
       icon: PenTool,
-      href: "/studio/new/phase/1"
+      href: "/studio?mode=new&phase=1"
     },
     {
       name: "Proyectos",
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                 <Bell className="w-4 h-4" />
               </Button>
               <Button 
-                onClick={() => router.push('/studio/new/phase/1')}
+                onClick={() => router.push('/studio?mode=new&phase=1')}
                 className="bg-gradient-to-r from-[#cb4335] to-[#a93226] hover:from-[#a93226] hover:to-[#922b21] text-white font-semibold px-6 shadow-lg"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -555,7 +555,7 @@ export default function DashboardPage() {
                           size="sm" 
                           variant="ghost" 
                           className="text-[#cb4335] hover:text-white hover:bg-[#cb4335] transition-colors"
-                          onClick={() => router.push('/studio/new/phase/1')}
+                          onClick={() => router.push('/studio?mode=new&phase=1')}
                         >
                           <Play className="w-4 h-4 mr-1" />
                           Aplicar

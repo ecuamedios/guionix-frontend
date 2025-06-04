@@ -18,22 +18,22 @@
 ### ✅ CARACTERÍSTICAS IMPLEMENTADAS
 
 #### 🚀 Sistema de Creación de Guiones en 4 Fases
-1. **Fase 1 - Generación de Ideas** (`/studio/new/phase/1`)
+1. **Fase 1 - Generación de Ideas** (`/studio?mode=new&phase=1`)
    - Integración con X.AI/Grok
    - Desarrollo de conceptos creativos
    - Análisis de audiencia y género
 
-2. **Fase 2 - Desarrollo de Estructura** (`/studio/new/phase/2`)
+2. **Fase 2 - Desarrollo de Estructura** (`/studio?mode=new&phase=2`)
    - Integración con ChatGPT-4
    - Arquitectura narrativa
    - Beats de historia y estructura
 
-3. **Fase 3 - Escritura Profesional** (`/studio/new/phase/3`)
+3. **Fase 3 - Escritura Profesional** (`/studio?mode=new&phase=3`)
    - Integración con Claude AI
    - Generación de guión completo
    - Formato profesional
 
-4. **Fase 4 - Control de Calidad** (`/studio/new/phase/4`)
+4. **Fase 4 - Control de Calidad** (`/studio?mode=new&phase=4`)
    - Sistema híbrido de AI
    - Validación y mejoras
    - Exportación final
@@ -57,11 +57,11 @@
 
 ### ✅ URLS VERIFICADAS
 - Dashboard principal: `https://guionix-nextjs-production.up.railway.app/`
-- Wizard de creación: `https://guionix-nextjs-production.up.railway.app/studio/new`
-- Fase 1: `https://guionix-nextjs-production.up.railway.app/studio/new/phase/1`
-- Fase 2: `https://guionix-nextjs-production.up.railway.app/studio/new/phase/2`
-- Fase 3: `https://guionix-nextjs-production.up.railway.app/studio/new/phase/3`
-- Fase 4: `https://guionix-nextjs-production.up.railway.app/studio/new/phase/4`
+- Wizard de creación: `https://guionix-nextjs-production.up.railway.app/studio?mode=new`
+- Fase 1: `https://guionix-nextjs-production.up.railway.app/studio?mode=new&phase=1`
+- Fase 2: `https://guionix-nextjs-production.up.railway.app/studio?mode=new&phase=2`
+- Fase 3: `https://guionix-nextjs-production.up.railway.app/studio?mode=new&phase=3`
+- Fase 4: `https://guionix-nextjs-production.up.railway.app/studio?mode=new&phase=4`
 
 ---
 
@@ -74,7 +74,7 @@ https://guionix-nextjs-production.up.railway.app/
 
 ### 2. Dashboard Principal
 - Botón "Nuevo Guión" ahora funcional
-- Redirige correctamente a `/studio/new`
+- Redirige correctamente a `/studio?mode=new`
 
 ### 3. Workflow de 4 Fases
 - **Progreso visual**: Barra de progreso entre fases
@@ -92,11 +92,11 @@ https://guionix-nextjs-production.up.railway.app/
 ## 🛠️ ARCHIVOS CREADOS/MODIFICADOS
 
 ### 📁 Nuevas Páginas
-- `/app/(dashboard)/studio/new/page.tsx` - Wizard principal
-- `/app/(dashboard)/studio/new/phase/1/page.tsx` - Fase 1
-- `/app/(dashboard)/studio/new/phase/2/page.tsx` - Fase 2  
-- `/app/(dashboard)/studio/new/phase/3/page.tsx` - Fase 3
-- `/app/(dashboard)/studio/new/phase/4/page.tsx` - Fase 4
+- `/app/(dashboard)/studio?mode=new/page.tsx` - Wizard principal
+- `/app/(dashboard)/studio?mode=new&phase=1/page.tsx` - Fase 1
+- `/app/(dashboard)/studio?mode=new&phase=2/page.tsx` - Fase 2  
+- `/app/(dashboard)/studio?mode=new&phase=3/page.tsx` - Fase 3
+- `/app/(dashboard)/studio?mode=new&phase=4/page.tsx` - Fase 4
 
 ### 🧩 Componentes UI
 - `/components/ui/scroll-area.tsx` - ScrollArea component

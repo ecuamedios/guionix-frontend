@@ -37,10 +37,10 @@ Hemos completado exitosamente la **unificación del Studio DENTRO del dashboard*
 ## 🎯 **FUNCIONALIDADES INTEGRADAS**
 
 ### **Acceso Directo al Studio** 🎬
-- **Nuevo Guión Guiado**: Navega a `/studio/new/phase/1`
+- **Nuevo Guión Guiado**: Navega a `/studio?mode=new&phase=1`
 - **Editor Avanzado**: Navega a `/studio?mode=expert`
 - **Generación de Ideas**: Modal con opciones:
-  - Idea desde cero → `/studio/new/phase/1`
+  - Idea desde cero → `/studio?mode=new&phase=1`
   - Desde YouTube → `/dashboard/youtube`
 - **Importar**: Navega a `/studio?mode=import`
 

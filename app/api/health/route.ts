@@ -2,35 +2,37 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Basic health check for now - we'll enhance this with backend service checks
-    console.log('[Health API] Frontend health check');
-    
-    return NextResponse.json({
-      status: 'healthy',
+    // Check database connection (optional)
+    // await prisma.$connect();
+
+    const healthData = {
+      status: "healthy",
       timestamp: new Date().toISOString(),
-      service: 'guionix-frontend',
+      service: "guionix-frontend",
+      version: "1.0.0",
       frontend: {
-        status: 'healthy',
-        version: '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
-        deployment: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+        status: "healthy",
+        version: "1.0.0",
+        environment: process.env.NODE_ENV || "development"
       },
       services: {
-        brain: process.env.GUIONIX_BRAIN_URL ? 'configured' : 'not-configured',
-        aiOrchestrator: process.env.GUIONIX_AI_ORCHESTRATOR_URL ? 'configured' : 'not-configured',
-        scriptEngine: process.env.GUIONIX_SCRIPT_ENGINE_URL ? 'configured' : 'not-configured',
-        exportEngine: process.env.GUIONIX_EXPORT_ENGINE_URL ? 'configured' : 'not-configured'
-      }
-    });
-    
+        brain: process.env.GUIONIX_BRAIN_URL ? "configured" : "not-configured",
+        aiOrchestrator: process.env.GUIONIX_AI_ORCHESTRATOR_URL ? "configured" : "not-configured",
+        scriptEngine: process.env.GUIONIX_SCRIPT_ENGINE_URL ? "configured" : "not-configured",
+        exportEngine: process.env.GUIONIX_EXPORT_ENGINE_URL ? "configured" : "not-configured"
+      },
+      database: process.env.DATABASE_URL ? "configured" : "not-configured"
+    };
+
+    return NextResponse.json(healthData, { status: 200 });
   } catch (error) {
-    console.error('[Health API] Health check failed:', error);
-    
-    return NextResponse.json({
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      service: 'guionix-frontend',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 503 });
+    return NextResponse.json(
+      {
+        status: "unhealthy",
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : "Unknown error"
+      },
+      { status: 500 }
+    );
   }
 }

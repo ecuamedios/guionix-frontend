@@ -11,14 +11,14 @@
 ## 🏆 ACHIEVEMENTS
 
 ### ✅ **PRIMARY OBJECTIVE COMPLETED**
-- **Fixed Dashboard Navigation**: The "Crear Guión" button was attempting to navigate to `/studio/new` which didn't exist
+- **Fixed Dashboard Navigation**: The "Crear Guión" button was attempting to navigate to `/studio?mode=new` which didn't exist
 - **Created Complete Route Structure**: Implemented all necessary pages and components for the 4-phase workflow
 - **Resolved All Technical Issues**: Fixed import errors, dependency issues, and compilation problems
 
 ### ✅ **4-PHASE AI WORKFLOW IMPLEMENTED**
 
 #### **PHASE 1: Idea Generation with X.AI/Grok**
-- **File**: `/app/(dashboard)/studio/new/phase/1/page.tsx`
+- **File**: `/app/(dashboard)/studio?mode=new&phase=1/page.tsx`
 - **Features**:
   - Interactive form for project concept input
   - X.AI/Grok integration simulation
@@ -27,7 +27,7 @@
   - Automatic advancement to Phase 2 upon approval
 
 #### **PHASE 2: Structure Development with ChatGPT-4**
-- **File**: `/app/(dashboard)/studio/new/phase/2/page.tsx`
+- **File**: `/app/(dashboard)/studio?mode=new&phase=2/page.tsx`
 - **Features**:
   - Three-act structure generation
   - Detailed beat sheet creation (Blake Snyder methodology)
@@ -36,7 +36,7 @@
   - Visual progress indicators and approval gates
 
 #### **PHASE 3: Professional Writing with Claude AI**
-- **File**: `/app/(dashboard)/studio/new/phase/3/page.tsx`
+- **File**: `/app/(dashboard)/studio?mode=new&phase=3/page.tsx`
 - **Features**:
   - Full script generation in professional format
   - Real-time writing progress with stage-by-stage updates
@@ -46,7 +46,7 @@
   - Export options (PDF, Fountain, Word)
 
 #### **PHASE 4: Quality Control & Final Review**
-- **File**: `/app/(dashboard)/studio/new/phase/4/page.tsx`
+- **File**: `/app/(dashboard)/studio?mode=new&phase=4/page.tsx`
 - **Features**:
   - Comprehensive script analysis with AI hybrid system
   - Quality scoring across multiple dimensions
@@ -55,7 +55,7 @@
   - Final export options and project completion
 
 ### ✅ **MAIN WIZARD & NAVIGATION**
-- **File**: `/app/(dashboard)/studio/new/page.tsx`
+- **File**: `/app/(dashboard)/studio?mode=new/page.tsx`
 - **Features**:
   - Process overview with clear phase descriptions
   - Progress tracking and time estimates
@@ -86,11 +86,11 @@ npm install @radix-ui/react-scroll-area
 
 ### **Route Structure Created**:
 ```
-/studio/new                    → Main wizard entry point
-/studio/new/phase/1           → X.AI Idea Generation
-/studio/new/phase/2           → ChatGPT-4 Structure Development  
-/studio/new/phase/3           → Claude Professional Writing
-/studio/new/phase/4           → AI Hybrid Quality Control
+/studio?mode=new                    → Main wizard entry point
+/studio?mode=new&phase=1           → X.AI Idea Generation
+/studio?mode=new&phase=2           → ChatGPT-4 Structure Development  
+/studio?mode=new&phase=3           → Claude Professional Writing
+/studio?mode=new&phase=4           → AI Hybrid Quality Control
 ```
 
 ### **Key Features Implemented**:
@@ -127,11 +127,11 @@ npm install @radix-ui/react-scroll-area
 
 ### **Browser Testing**:
 - **URL**: `http://localhost:3005`
-- **Main Wizard**: `http://localhost:3005/studio/new` ✅
-- **Phase 1**: `http://localhost:3005/studio/new/phase/1` ✅
-- **Phase 2**: `http://localhost:3005/studio/new/phase/2` ✅ 
-- **Phase 3**: `http://localhost:3005/studio/new/phase/3` ✅
-- **Phase 4**: `http://localhost:3005/studio/new/phase/4` ✅
+- **Main Wizard**: `http://localhost:3005/studio?mode=new` ✅
+- **Phase 1**: `http://localhost:3005/studio?mode=new&phase=1` ✅
+- **Phase 2**: `http://localhost:3005/studio?mode=new&phase=2` ✅ 
+- **Phase 3**: `http://localhost:3005/studio?mode=new&phase=3` ✅
+- **Phase 4**: `http://localhost:3005/studio?mode=new&phase=4` ✅
 
 ---
 
@@ -167,11 +167,11 @@ npm install @radix-ui/react-scroll-area
 ## 📁 FILES CREATED/MODIFIED
 
 ### **New Files Created**:
-1. `/app/(dashboard)/studio/new/page.tsx` - Main wizard entry point
-2. `/app/(dashboard)/studio/new/phase/1/page.tsx` - Phase 1: Idea Generation
-3. `/app/(dashboard)/studio/new/phase/2/page.tsx` - Phase 2: Structure Development
-4. `/app/(dashboard)/studio/new/phase/3/page.tsx` - Phase 3: Professional Writing
-5. `/app/(dashboard)/studio/new/phase/4/page.tsx` - Phase 4: Quality Control
+1. `/app/(dashboard)/studio?mode=new/page.tsx` - Main wizard entry point
+2. `/app/(dashboard)/studio?mode=new&phase=1/page.tsx` - Phase 1: Idea Generation
+3. `/app/(dashboard)/studio?mode=new&phase=2/page.tsx` - Phase 2: Structure Development
+4. `/app/(dashboard)/studio?mode=new&phase=3/page.tsx` - Phase 3: Professional Writing
+5. `/app/(dashboard)/studio?mode=new&phase=4/page.tsx` - Phase 4: Quality Control
 6. `/components/ui/scroll-area.tsx` - ScrollArea UI component
 
 ### **Dependencies Added**:

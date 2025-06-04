@@ -2,15 +2,22 @@
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lightbulb, FileText, Edit3, CheckCircle } from "lucide-react";
 
 // Hooks y componentes
-import { useStudioMode, type StudioMode } from "@/hooks/useStudioMode";
+import { useStudioMode, useWizard, type StudioMode } from "@/hooks/useStudioMode";
 import ModeSelector from "@/components/studio/ModeSelector";
 import NewUserMode from "@/components/studio/modes/NewUserMode";
 import ExpertMode from "@/components/studio/modes/ExpertMode";
 import ImportMode from "@/components/studio/modes/ImportMode";
 import CollabMode from "@/components/studio/modes/CollabMode";
+import WizardLayout from "@/components/studio/wizard/WizardLayout";
+
+// Importar los componentes de las fases (temporalmente los crearemos)
+// import Phase1Ideas from "@/components/studio/wizard/Phase1Ideas";
+// import Phase2Structure from "@/components/studio/wizard/Phase2Structure";
+// import Phase3Writing from "@/components/studio/wizard/Phase3Writing";
+// import Phase4Quality from "@/components/studio/wizard/Phase4Quality";
 
 interface StudioUnifiedProps {
   initialMode?: StudioMode;
@@ -20,35 +27,80 @@ export default function StudioUnified({ initialMode }: StudioUnifiedProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const { mode, switchMode, userProfile, isLoading } = useStudioMode();
+  const { 
+    mode, 
+    currentPhase, 
+    switchMode, 
+    switchPhase, 
+    userProfile, 
+    projectData, 
+    startNewProject,
+    isLoading 
+  } = useStudioMode();
+  
+  const { 
+    phases, 
+    nextPhase, 
+    previousPhase, 
+    canGoToPhase 
+  } = useWizard();
 
   // Sincronizar con URL
   useEffect(() => {
     const urlMode = searchParams.get('mode') as StudioMode;
+    const urlPhase = searchParams.get('phase');
+    
     if (urlMode && urlMode !== mode && ['new', 'expert', 'import', 'collab'].includes(urlMode)) {
       switchMode(urlMode);
     }
-  }, [searchParams, mode, switchMode]);
+    
+    if (urlMode === 'new' && urlPhase && ['1', '2', '3', '4'].includes(urlPhase)) {
+      const phaseNum = parseInt(urlPhase) as any;
+      if (phaseNum !== currentPhase) {
+        switchPhase(phaseNum);
+      }
+    }
+  }, [searchParams, mode, currentPhase, switchMode, switchPhase]);
 
-  // Actualizar URL cuando cambia el modo
+  // Actualizar URL cuando cambia el modo o fase
   const handleModeSwitch = (newMode: StudioMode) => {
     const url = new URL(window.location.href);
     
     if (newMode === 'selector') {
       url.searchParams.delete('mode');
+      url.searchParams.delete('phase');
     } else {
       url.searchParams.set('mode', newMode);
+      if (newMode === 'new') {
+        url.searchParams.set('phase', currentPhase.toString());
+      } else {
+        url.searchParams.delete('phase');
+      }
     }
     
     router.push(url.pathname + url.search, { scroll: false });
     switchMode(newMode);
   };
 
+  const handlePhaseChange = (newPhase: number) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('phase', newPhase.toString());
+    router.push(url.pathname + url.search, { scroll: false });
+    switchPhase(newPhase as any);
+  };
+
   // Manejar creación de proyecto desde importación
   const handleProjectCreated = (project: any) => {
     console.log("Project created:", project);
-    // Aquí se podría guardar el proyecto en el estado global o contexto
     switchMode('expert');
+  };
+
+  const handleStartNewProject = () => {
+    startNewProject();
+    const url = new URL(window.location.href);
+    url.searchParams.set('mode', 'new');
+    url.searchParams.set('phase', '1');
+    router.push(url.pathname + url.search, { scroll: false });
   };
 
   // Loading states
@@ -86,12 +138,87 @@ export default function StudioUnified({ initialMode }: StudioUnifiedProps) {
     );
   }
 
-  // Renderizar componente según el modo
+  // Renderizar wizard si estamos en modo new
+  if (mode === 'new') {
+    return (
+      <WizardLayout
+        currentPhase={currentPhase}
+        phases={phases}
+        onPhaseChange={handlePhaseChange}
+        onBack={currentPhase > 1 ? previousPhase : undefined}
+        onNext={currentPhase < 4 ? nextPhase : undefined}
+        canGoNext={true}
+        canGoBack={currentPhase > 1}
+      >
+        {/* Contenido de la fase actual - temporalmente mostraremos placeholders */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {currentPhase === 1 && (
+            <div className="text-center">
+              <Lightbulb className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+              <h2 className="text-3xl font-bold text-white mb-4">Fase 1: Generación de Ideas</h2>
+              <p className="text-gray-300 mb-8">
+                Desarrollo inicial del concepto y estructura básica del guión con X.AI/Grok
+              </p>
+              <div className="bg-slate-800 rounded-lg p-8">
+                <p className="text-white">
+                  Aquí irá el componente Phase1Ideas - Funcionalidad de generación de ideas con IA
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {currentPhase === 2 && (
+            <div className="text-center">
+              <FileText className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+              <h2 className="text-3xl font-bold text-white mb-4">Fase 2: Desarrollo de Estructura</h2>
+              <p className="text-gray-300 mb-8">
+                Creación de la estructura narrativa, actos y puntos de giro con ChatGPT-4
+              </p>
+              <div className="bg-slate-800 rounded-lg p-8">
+                <p className="text-white">
+                  Aquí irá el componente Phase2Structure - Desarrollo de estructura narrativa
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {currentPhase === 3 && (
+            <div className="text-center">
+              <Edit3 className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+              <h2 className="text-3xl font-bold text-white mb-4">Fase 3: Escritura Profesional</h2>
+              <p className="text-gray-300 mb-8">
+                Redacción completa del guión con formato profesional usando Claude
+              </p>
+              <div className="bg-slate-800 rounded-lg p-8">
+                <p className="text-white">
+                  Aquí irá el componente Phase3Writing - Escritura profesional del guión
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {currentPhase === 4 && (
+            <div className="text-center">
+              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+              <h2 className="text-3xl font-bold text-white mb-4">Fase 4: Control de Calidad</h2>
+              <p className="text-gray-300 mb-8">
+                Revisión final, validación y pulido del guión con Sistema Híbrido
+              </p>
+              <div className="bg-slate-800 rounded-lg p-8">
+                <p className="text-white">
+                  Aquí irá el componente Phase4Quality - Control de calidad y revisión final
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </WizardLayout>
+    );
+  }
+
+  // Renderizar componente según el modo (modos originales)
   const renderModeComponent = () => {
     switch (mode) {
-      case 'new':
-        return <NewUserMode onModeSwitch={handleModeSwitch} />;
-      
       case 'expert':
         return <ExpertMode onModeSwitch={handleModeSwitch} />;
       
@@ -108,14 +235,14 @@ export default function StudioUnified({ initialMode }: StudioUnifiedProps) {
       
       case 'selector':
       default:
-        return <ModeSelector />;
+        return <ModeSelector onStartNewProject={handleStartNewProject} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Barra de navegación contextual */}
-      {mode !== 'selector' && (
+      {(mode === 'expert' || mode === 'import' || mode === 'collab') && (
         <div className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center justify-between px-4 py-2">
             <div className="flex items-center space-x-4">
@@ -127,7 +254,6 @@ export default function StudioUnified({ initialMode }: StudioUnifiedProps) {
               </button>
               <div className="h-4 w-px bg-border" />
               <span className="text-sm font-medium">
-                {mode === 'new' && 'Workflow Guiado'}
                 {mode === 'expert' && 'Editor Avanzado'}
                 {mode === 'import' && 'Importar Proyecto'}
                 {mode === 'collab' && 'Colaboración'}

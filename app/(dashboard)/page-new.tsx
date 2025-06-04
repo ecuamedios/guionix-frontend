@@ -139,7 +139,7 @@ export default function DashboardPage() {
     {
       name: "Crear nuevo guión",
       icon: Plus,
-      href: "/studio/new/phase/1"
+      href: "/studio?mode=new&phase=1"
     },
     {
       name: "Proyectos",
@@ -309,7 +309,7 @@ export default function DashboardPage() {
               <p className="text-gray-400">Bienvenido de nuevo, {session.user?.name?.split(' ')[0] || 'Guionista'}</p>
             </div>
             <Button 
-              onClick={() => router.push('/studio/new/phase/1')}
+              onClick={() => router.push('/studio?mode=new&phase=1')}
               className="bg-[#cb4335] hover:bg-[#a93529] text-white font-semibold px-6"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -516,7 +516,7 @@ export default function DashboardPage() {
                           size="sm" 
                           variant="ghost" 
                           className="text-[#cb4335] hover:text-white"
-                          onClick={() => router.push('/studio/new/phase/1')}
+                          onClick={() => router.push('/studio?mode=new&phase=1')}
                         >
                           <Play className="w-4 h-4 mr-1" />
                           Crear guión

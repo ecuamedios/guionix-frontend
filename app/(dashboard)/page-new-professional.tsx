@@ -114,7 +114,7 @@ export default function DashboardPage() {
       id: 'new-script', 
       label: 'Crear nuevo guión', 
       icon: Plus, 
-      href: '/studio/new/phase/1' 
+      href: '/studio?mode=new&phase=1' 
     },
     { 
       id: 'projects', 
@@ -273,7 +273,7 @@ export default function DashboardPage() {
             
             <div className="flex items-center space-x-4">
               <Button
-                onClick={() => router.push('/studio/new/phase/1')}
+                onClick={() => router.push('/studio?mode=new&phase=1')}
                 className="bg-[#cb4335] hover:bg-[#cb4335]/90 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />

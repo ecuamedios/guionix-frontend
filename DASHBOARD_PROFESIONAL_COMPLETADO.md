@@ -7,7 +7,7 @@
 - ✅ Colores corporativos implementados: #cb4335 (rojo), #17202a (oscuro), #ffffff (blanco)
 - ✅ Estructura de navegación completa con secciones:
   - Dashboard (activo)
-  - Crear nuevo guión → `/studio/new/phase/1`
+  - Crear nuevo guión → `/studio?mode=new&phase=1`
   - Proyectos → `/projects`
   - Actores (Próximamente)
   - Locaciones (Próximamente)

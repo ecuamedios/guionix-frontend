@@ -11,7 +11,7 @@
 ## 🎯 OBJETIVOS COMPLETADOS
 
 ### ✅ **Análisis de Duplicación Resuelto**
-- Sistema principal `/studio` (380 líneas) vs workflow guiado `/studio/new` 
+- Sistema principal `/studio` (380 líneas) vs workflow guiado `/studio?mode=new` 
 - Identificación exitosa de duplicación de funcionalidades
 - Creación de arquitectura unificada convergente
 
@@ -44,7 +44,7 @@
 ### **3. Modos Especializados**
 
 #### **NewUserMode.tsx** - Workflow Guiado
-- Bridge al sistema `/studio/new/phase/1` existente
+- Bridge al sistema `/studio?mode=new&phase=1` existente
 - Mantiene compatibilidad con 4 fases de creación
 - Ideal para usuarios principiantes (isFirstTime=true)
 
@@ -108,7 +108,7 @@ npm install react-resizable-panels                # Para layouts ExpertMode/Coll
 ### **Antes:**
 ```
 /studio/page.tsx           → Sistema monolítico (380 líneas)
-/studio/new/phase/[id]     → Workflow guiado separado
+/studio?mode=new/phase/[id]     → Workflow guiado separado
 ```
 
 ### **Después:**

@@ -80,7 +80,7 @@ export default function NewUserMode({ onModeSwitch }: NewUserModeProps) {
   const handleStartProcess = () => {
     setIsStarted(true);
     // Navegar directamente a la fase 1 del workflow existente
-    router.push('/studio/new/phase/1');
+    router.push('/studio?mode=new&phase=1');
   };
 
   const handleBackToSelector = () => {
