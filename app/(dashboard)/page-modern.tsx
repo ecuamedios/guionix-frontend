@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -84,7 +83,7 @@ interface MenuItem {
   badge?: string;
 }
 
-export default function DashboardPage() {
+export default function ModernDashboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
@@ -200,132 +199,159 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-      {/* Mobile sidebar overlay */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 flex">
+      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm lg:hidden z-40"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center justify-between p-6 border-b border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div>
+      <div className={`
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 transition-transform duration-300 ease-in-out
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 
+        flex flex-col shadow-2xl lg:shadow-none
+      `}>
+        {/* Logo */}
+        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 GUIONIX
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Studio Dashboard</p>
             </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden"
-          >
-            <X className="w-4 h-4" />
-          </Button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        {/* Menu Items */}
+        <nav className="flex-1 p-4 space-y-2">
           {menuItems.map((item) => (
-            <Button
+            <button
               key={item.name}
-              variant={item.active ? "default" : "ghost"}
-              className={`w-full justify-start text-left ${
-                item.active 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' 
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-              onClick={() => item.href && router.push(item.href)}
+              onClick={() => {
+                if (!item.comingSoon && item.href) {
+                  router.push(item.href);
+                  setSidebarOpen(false);
+                }
+              }}
+              className={`
+                w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 group
+                ${item.active 
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
+                }
+              `}
             >
-              <item.icon className="w-4 h-4 mr-3" />
-              {item.name}
+              <div className="flex items-center space-x-3">
+                <item.icon className={`w-5 h-5 ${item.active ? 'text-white' : ''}`} />
+                <span className="font-medium">{item.name}</span>
+              </div>
               {item.badge && (
-                <Badge variant="secondary" className="ml-auto text-xs">
+                <Badge className={`text-xs px-2 py-0.5 ${
+                  item.active 
+                    ? 'bg-white/20 text-white border-white/20' 
+                    : 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                }`}>
                   {item.badge}
                 </Badge>
               )}
-            </Button>
+            </button>
           ))}
         </nav>
 
-        <div className="absolute bottom-4 left-4 right-4">
-          <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200/50 dark:border-blue-700/50">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-medium text-sm">
-                    {session?.user?.name?.charAt(0) || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                    {session?.user?.name || 'Usuario'}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                    {session?.user?.email}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Theme Toggle & User info */}
+        <div className="p-4 space-y-3 border-t border-slate-200/50 dark:border-slate-700/50">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center space-x-3 p-3 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-5 h-5" />
+                <span className="font-medium">Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-5 h-5" />
+                <span className="font-medium">Dark Mode</span>
+              </>
+            )}
+          </button>
+
+          {/* User info */}
+          <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-700">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-bold">
+                {session.user?.name?.charAt(0) || 'U'}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                {session.user?.name || 'Usuario'}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                {session.user?.email}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
-        {/* Top navigation */}
-        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-30">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden"
-                >
-                  <Menu className="w-4 h-4" />
-                </Button>
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                    Dashboard
-                  </h1>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Welcome back, {session?.user?.name?.split(' ')[0] || 'User'}
-                  </p>
-                </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Projects</h1>
+                <p className="text-slate-600 dark:text-slate-400">Welcome back, {session.user?.name?.split(' ')[0] || 'Creator'}</p>
               </div>
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm">
-                  <Search className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <Bell className="w-4 h-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={toggleTheme}
-                >
-                  {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                </Button>
-              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline"
+                size="sm"
+                className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Search
+              </Button>
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create New Project
+              </Button>
             </div>
           </div>
         </header>
 
-        {/* Dashboard content */}
-        <main className="p-6 space-y-8">
+        {/* Content */}
+        <main className="flex-1 overflow-auto p-6">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card className="bg-white/50 dark:bg-slate-800/50 backdrop-blur border-slate-200/50 dark:border-slate-700/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
               <CardHeader className="pb-3">
                 <CardTitle className="text-slate-900 dark:text-white text-lg flex items-center justify-between">
@@ -333,14 +359,14 @@ export default function DashboardPage() {
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
                       <Briefcase className="w-5 h-5 text-white" />
                     </div>
-                    Total Projects
+                    Projects
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-slate-400" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{stats.totalProjects}</div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">+2 from last month</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">{stats.activeProjects} active</p>
               </CardContent>
             </Card>
 
@@ -351,14 +377,14 @@ export default function DashboardPage() {
                     <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center mr-3">
                       <CheckCircle2 className="w-5 h-5 text-white" />
                     </div>
-                    Active
+                    Completed
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-slate-400" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{stats.activeProjects}</div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">in progress</p>
+                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{stats.completedProjects}</div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">this month</p>
               </CardContent>
             </Card>
 
@@ -367,16 +393,16 @@ export default function DashboardPage() {
                 <CardTitle className="text-slate-900 dark:text-white text-lg flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-                      <Brain className="w-5 h-5 text-white" />
+                      <Users className="w-5 h-5 text-white" />
                     </div>
-                    AI Ideas
+                    Teams
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-slate-400" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{stats.aiIdeasGenerated}</div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">generated</p>
+                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{stats.teamMembers}</div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">members</p>
               </CardContent>
             </Card>
 
