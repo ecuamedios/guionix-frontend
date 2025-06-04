@@ -85,7 +85,7 @@ export default function DashboardPage() {
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const { toasts, addToast, removeToast } = useToast();
+  // const { toasts, addToast, removeToast } = useToast(); // Commented out for backup file
   
   // Mock notification data (in a real app, this would come from an API)
   const [notifications] = useState([
