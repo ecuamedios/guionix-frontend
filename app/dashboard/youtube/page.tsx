@@ -1,239 +1,466 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useYouTubeData } from '@/hooks/useYouTubeData';
-import { VideoCard } from '@/components/dashboard/VideoCardSimple';
-import { VideoInsightModal } from '@/components/dashboard/VideoInsightModal';
-import { YouTubeVideo, TimeFilter, CategoryFilter } from '@/types/youtube';
-import { Loader2, TrendingUp, Clock, Filter, RefreshCw } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Card,
+  Row,
+  Col,
+  Table,
+  Space,
+  Button,
+  Input,
+  Select,
+  Tag,
+  Avatar,
+  Typography,
+  Progress,
+  Statistic,
+  List,
+  Tabs,
+  Modal,
+  Form,
+  message
+} from "antd";
+import {
+  YoutubeOutlined,
+  PlayCircleOutlined,
+  EyeOutlined,
+  LikeOutlined,
+  ShareAltOutlined,
+  DownloadOutlined,
+  SearchOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  UploadOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined
+} from "@ant-design/icons";
 
-export default function YouTubeDashboard() {
-  const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>('24h');
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
-  const [isInsightModalOpen, setIsInsightModalOpen] = useState(false);
+const { Title, Text } = Typography;
+const { Search } = Input;
+const { Option } = Select;
+const { TabPane } = Tabs;
 
-  const { 
-    videos, 
-    loading: isLoading, 
-    error: isError, 
-    refreshVideos: refetch,
-    setTimeFilter: updateTimeFilter,
-    setCategoryFilter: updateCategoryFilter,
-    generateInsights,
-    insights,
-    insightsLoading
-  } = useYouTubeData({
-    initialTimeFilter: timeFilter,
-    initialCategoryFilter: categoryFilter,
-    maxResults: 20
-  });
-
-  const handleVideoClick = async (video: YouTubeVideo) => {
-    setSelectedVideo(video);
-    
-    // Generate insights if not already available
-    if (!insights[video.id] && !insightsLoading[video.id]) {
-      await generateInsights(video);
+const mockYouTubeData = {
+  trending: [
+    {
+      id: 1,
+      title: "Como Crear GUIONES de DRAMA que ENGANCHEN",
+      channel: "FilmMaker Pro",
+      views: "2.5M",
+      likes: "89K",
+      uploadDate: "Hace 3 días",
+      duration: "12:45",
+      thumbnail: "/api/placeholder/320/180",
+      category: "Educación",
+      tags: ["guiones", "drama", "escritura"]
+    },
+    {
+      id: 2,
+      title: "Los MEJORES DIÁLOGOS del Cine Romántico",
+      channel: "Cinema Lovers",
+      views: "1.8M",
+      likes: "67K",
+      uploadDate: "Hace 1 semana",
+      duration: "18:30",
+      thumbnail: "/api/placeholder/320/180",
+      category: "Entretenimiento",
+      tags: ["romance", "diálogos", "cine"]
+    },
+    {
+      id: 3,
+      title: "THRILLER vs SUSPENSE: Diferencias Clave",
+      channel: "Storytelling Academy",
+      views: "956K",
+      likes: "42K",
+      uploadDate: "Hace 4 días",
+      duration: "9:15",
+      thumbnail: "/api/placeholder/320/180",
+      category: "Educación",
+      tags: ["thriller", "suspense", "género"]
     }
-    
-    setIsInsightModalOpen(true);
+  ],
+  myContent: [
+    {
+      id: 1,
+      title: "Mi Primer Guión Generado con IA",
+      status: "published",
+      views: "1.2K",
+      likes: "89",
+      publishDate: "2024-06-01",
+      duration: "5:30"
+    },
+    {
+      id: 2,
+      title: "Romance en París - Behind the Scenes",
+      status: "draft",
+      views: "0",
+      likes: "0",
+      publishDate: "",
+      duration: "8:45"
+    }
+  ],
+  analytics: {
+    totalViews: 15340,
+    totalLikes: 892,
+    totalSubscribers: 234,
+    averageWatchTime: "6:42"
+  }
+};
+
+const YouTubePage = () => {
+  const [activeTab, setActiveTab] = useState("trending");
+  const [timeFilter, setTimeFilter] = useState("today");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [uploadModalVisible, setUploadModalVisible] = useState(false);
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      "Educación": "blue",
+      "Entretenimiento": "purple",
+      "Música": "red",
+      "Gaming": "green",
+      "Noticias": "orange"
+    };
+    return colors[category as keyof typeof colors] || "default";
   };
 
-  const handleTimeFilterChange = (filter: TimeFilter) => {
-    setTimeFilter(filter);
-    updateTimeFilter(filter);
+  const getStatusColor = (status: string) => {
+    return status === "published" ? "green" : "orange";
   };
 
-  const handleCategoryFilterChange = (filter: CategoryFilter) => {
-    setCategoryFilter(filter);
-    updateCategoryFilter(filter);
-  };
-
-  const handleRefresh = () => {
-    refetch();
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-[#cb4335] rounded-lg">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  YouTube Insights
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Descubre tendencias y genera ideas para tus guiones
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="flex items-center space-x-2 px-4 py-2 bg-[#cb4335] text-white rounded-lg hover:bg-[#a93226] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>Actualizar</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center space-x-4 mb-6">
-            <Filter className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Filtros
-            </h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Time Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                <Clock className="inline h-4 w-4 mr-2" />
-                Período de tiempo
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { value: '24h' as TimeFilter, label: '24 horas' },
-                  { value: '7d' as TimeFilter, label: '7 días' },
-                  { value: '30d' as TimeFilter, label: '30 días' }
-                ].map(({ value, label }) => (
-                  <button
-                    key={value}
-                    onClick={() => handleTimeFilterChange(value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      timeFilter === value
-                        ? 'bg-[#cb4335] text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                <TrendingUp className="inline h-4 w-4 mr-2" />
-                Categoría
-              </label>
-              <select
-                value={categoryFilter}
-                onChange={(e) => handleCategoryFilterChange(e.target.value as CategoryFilter)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#cb4335] focus:border-transparent"
-              >
-                <option value="all">Todas las categorías</option>
-                <option value="entertainment">Entretenimiento</option>
-                <option value="education">Educación</option>
-                <option value="comedy">Comedia</option>
-                <option value="music">Música</option>
-                <option value="gaming">Gaming</option>
-                <option value="news">Noticias</option>
-                <option value="lifestyle">Estilo de vida</option>
-                <option value="technology">Tecnología</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[#cb4335] mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">
-                Cargando videos trending...
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {isError && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
-            <div className="text-center">
-              <div className="text-red-600 dark:text-red-400 mb-2">
-                <TrendingUp className="h-8 w-8 mx-auto" />
-              </div>
-              <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">
-                Error al cargar videos
-              </h3>
-              <p className="text-red-600 dark:text-red-400 mb-4">
-                No se pudieron cargar los videos trending. Verifica tu configuración de API.
-              </p>
-              <button
-                onClick={handleRefresh}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Intentar de nuevo
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Videos Grid */}
-        {!isLoading && !isError && videos && (
-          <>
-            <div className="mb-6">
-              <p className="text-gray-600 dark:text-gray-400">
-                Mostrando {videos.length} videos trending en español de los últimos {
-                  timeFilter === '24h' ? '24 horas' :
-                  timeFilter === '7d' ? '7 días' : '30 días'
-                }
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {videos.map((video) => (
-                <VideoCard
-                  key={video.id}
-                  video={video}
-                  onClick={() => handleVideoClick(video)}
-                />
+  const trendingColumns = [
+    {
+      title: "Video",
+      dataIndex: "title",
+      key: "title",
+      render: (text: string, record: any) => (
+        <Space>
+          <Avatar 
+            shape="square"
+            size={64}
+            src={record.thumbnail}
+            icon={<PlayCircleOutlined />}
+          />
+          <div>
+            <div style={{ fontWeight: 500, maxWidth: 300 }}>{text}</div>
+            <Text type="secondary" style={{ fontSize: "12px" }}>
+              {record.channel} • {record.duration}
+            </Text>
+            <div style={{ marginTop: 4 }}>
+              <Tag color={getCategoryColor(record.category)}>
+                {record.category}
+              </Tag>
+              {record.tags.map((tag: string) => (
+                <Tag key={tag}>{tag}</Tag>
               ))}
             </div>
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: "Estadísticas",
+      key: "stats",
+      render: (record: any) => (
+        <Space direction="vertical" size="small">
+          <div style={{ fontSize: "12px" }}>
+            <EyeOutlined style={{ color: "#666", marginRight: 4 }} />
+            {record.views} visualizaciones
+          </div>
+          <div style={{ fontSize: "12px" }}>
+            <LikeOutlined style={{ color: "#f5222d", marginRight: 4 }} />
+            {record.likes} me gusta
+          </div>
+          <div style={{ fontSize: "12px" }}>
+            <CalendarOutlined style={{ color: "#666", marginRight: 4 }} />
+            {record.uploadDate}
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: "Acciones",
+      key: "actions",
+      render: (record: any) => (
+        <Space>
+          <Button size="small" icon={<PlayCircleOutlined />}>
+            Ver
+          </Button>
+          <Button size="small" icon={<DownloadOutlined />}>
+            Analizar
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
-            {videos.length === 0 && (
-              <div className="text-center py-12">
-                <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No se encontraron videos
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Prueba con diferentes filtros o actualiza la página.
-                </p>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+  const myContentColumns = [
+    {
+      title: "Contenido",
+      dataIndex: "title",
+      key: "title",
+      render: (text: string, record: any) => (
+        <Space>
+          <Avatar icon={<YoutubeOutlined />} />
+          <div>
+            <div style={{ fontWeight: 500 }}>{text}</div>
+            <Text type="secondary" style={{ fontSize: "12px" }}>
+              Duración: {record.duration}
+            </Text>
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: "Estado",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <Tag color={getStatusColor(status)}>
+          {status === "published" ? "Publicado" : "Borrador"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Estadísticas",
+      key: "stats",
+      render: (record: any) => (
+        <Space direction="vertical" size="small">
+          <div style={{ fontSize: "12px" }}>
+            <EyeOutlined /> {record.views} views
+          </div>
+          <div style={{ fontSize: "12px" }}>
+            <LikeOutlined /> {record.likes} likes
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: "Fecha",
+      dataIndex: "publishDate",
+      key: "publishDate",
+      render: (date: string) => date || "Sin publicar",
+    },
+  ];
 
-      {/* Insight Modal */}
-      {selectedVideo && (
-        <VideoInsightModal
-          insight={insights[selectedVideo.id] || null}
-          isOpen={isInsightModalOpen}
-          onClose={() => {
-            setIsInsightModalOpen(false);
-            setSelectedVideo(null);
-          }}
-        />
-      )}
+  return (
+    <div style={{ padding: "24px" }}>
+      {/* Header */}
+      <Card style={{ marginBottom: "24px" }}>
+        <Row justify="space-between" align="middle">
+          <Col>
+            <Title level={2} style={{ margin: 0 }}>
+              <YoutubeOutlined style={{ color: "#ff4d4f" }} /> YouTube Studio
+            </Title>
+            <Text type="secondary">
+              Analiza tendencias, sube contenido y gestiona tu canal
+            </Text>
+          </Col>
+          <Col>
+            <Space>
+              <Button icon={<UploadOutlined />}>
+                Subir Video
+              </Button>
+              <Button 
+                type="primary" 
+                icon={<PlusOutlined />}
+                onClick={() => setUploadModalVisible(true)}
+              >
+                Crear desde Guión
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+
+      {/* Estadísticas Generales */}
+      <Row gutter={16} style={{ marginBottom: "24px" }}>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Visualizaciones Totales"
+              value={mockYouTubeData.analytics.totalViews}
+              prefix={<EyeOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Me Gusta Totales"
+              value={mockYouTubeData.analytics.totalLikes}
+              prefix={<LikeOutlined style={{ color: "#f5222d" }} />}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Suscriptores"
+              value={mockYouTubeData.analytics.totalSubscribers}
+              prefix={<YoutubeOutlined style={{ color: "#ff4d4f" }} />}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Tiempo Promedio"
+              value={mockYouTubeData.analytics.averageWatchTime}
+              prefix={<ClockCircleOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Contenido Principal */}
+      <Card>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          tabBarExtraContent={
+            <Space>
+              <Select
+                value={timeFilter}
+                onChange={setTimeFilter}
+                style={{ width: 120 }}
+              >
+                <Option value="today">Hoy</Option>
+                <Option value="week">Esta semana</Option>
+                <Option value="month">Este mes</Option>
+                <Option value="year">Este año</Option>
+              </Select>
+              <Select
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                style={{ width: 140 }}
+              >
+                <Option value="all">Todas las categorías</Option>
+                <Option value="education">Educación</Option>
+                <Option value="entertainment">Entretenimiento</Option>
+                <Option value="music">Música</Option>
+              </Select>
+            </Space>
+          }
+        >
+          <TabPane tab="Tendencias" key="trending">
+            <Table
+              dataSource={mockYouTubeData.trending}
+              columns={trendingColumns}
+              rowKey="id"
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+              }}
+            />
+          </TabPane>
+          
+          <TabPane tab="Mi Contenido" key="mycontent">
+            <Table
+              dataSource={mockYouTubeData.myContent}
+              columns={myContentColumns}
+              rowKey="id"
+              pagination={false}
+            />
+          </TabPane>
+
+          <TabPane tab="Análisis" key="analytics">
+            <Row gutter={16}>
+              <Col span={12}>
+                <Card title="Rendimiento por Categoría">
+                  <List
+                    dataSource={[
+                      { category: "Educación", percentage: 45, color: "#1890ff" },
+                      { category: "Entretenimiento", percentage: 30, color: "#52c41a" },
+                      { category: "Tutoriales", percentage: 25, color: "#faad14" }
+                    ]}
+                    renderItem={(item) => (
+                      <List.Item>
+                        <div style={{ width: "100%" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                            <Text>{item.category}</Text>
+                            <Text strong>{item.percentage}%</Text>
+                          </div>
+                          <Progress percent={item.percentage} strokeColor={item.color} />
+                        </div>
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card title="Actividad Reciente">
+                  <List
+                    dataSource={[
+                      "Video 'Romance en París' alcanzó 1K visualizaciones",
+                      "Nuevo suscriptor: @filmmaker_pro",
+                      "Comentario destacado en 'Thriller Nocturno'",
+                      "Video añadido a playlist por @drama_lover"
+                    ]}
+                    renderItem={(item) => (
+                      <List.Item>
+                        <Text>{item}</Text>
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          </TabPane>
+        </Tabs>
+      </Card>
+
+      {/* Modal de Creación */}
+      <Modal
+        title="Crear Video desde Guión"
+        open={uploadModalVisible}
+        onCancel={() => setUploadModalVisible(false)}
+        footer={null}
+        width={600}
+      >
+        <Form layout="vertical">
+          <Form.Item label="Seleccionar Guión">
+            <Select placeholder="Elige un guión existente">
+              <Option value="romance-paris">Romance en París</Option>
+              <Option value="aventura-espacial">Aventura Espacial</Option>
+              <Option value="thriller-nocturno">Thriller Nocturno</Option>
+            </Select>
+          </Form.Item>
+          
+          <Form.Item label="Título del Video">
+            <Input placeholder="Ej: Romance en París - Episodio 1" />
+          </Form.Item>
+          
+          <Form.Item label="Descripción">
+            <Input.TextArea 
+              rows={4}
+              placeholder="Describe tu video para YouTube..."
+            />
+          </Form.Item>
+
+          <Form.Item label="Etiquetas">
+            <Select mode="tags" placeholder="Añade etiquetas relevantes">
+              <Option value="romance">romance</Option>
+              <Option value="drama">drama</Option>
+              <Option value="guión">guión</Option>
+            </Select>
+          </Form.Item>
+
+          <div style={{ textAlign: "right" }}>
+            <Space>
+              <Button onClick={() => setUploadModalVisible(false)}>
+                Cancelar
+              </Button>
+              <Button type="primary">
+                Generar Video
+              </Button>
+            </Space>
+          </div>
+        </Form>
+      </Modal>
     </div>
   );
-}
+};
+
+export default YouTubePage; 

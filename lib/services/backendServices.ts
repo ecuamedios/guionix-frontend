@@ -45,7 +45,7 @@ const createServiceClient = (baseURL: string, apiKey?: string): AxiosInstance =>
   return client;
 };
 
-// 🧠 GUIONIX BRAIN SERVICE
+// 🧠 GUIONIX BRAIN (USER MANAGEMENT)
 export const brainService = createServiceClient(
   process.env.GUIONIX_BRAIN_URL!,
   process.env.GUIONIX_BRAIN_API_KEY
@@ -69,13 +69,20 @@ export const exportEngineService = createServiceClient(
   process.env.GUIONIX_EXPORT_ENGINE_API_KEY
 );
 
-// Service availability checker
+// 🧮 GUIONIX ML ENGINE (NUEVO)
+export const mlEngineService = createServiceClient(
+  process.env.GUIONIX_ML_ENGINE_URL!,
+  process.env.GUIONIX_ML_ENGINE_API_KEY
+);
+
+// Health check function for all services
 export const checkServiceHealth = async () => {
   const services = [
-    { name: 'Brain', client: brainService, url: process.env.GUIONIX_BRAIN_URL },
-    { name: 'AI Orchestrator', client: aiOrchestratorService, url: process.env.GUIONIX_AI_ORCHESTRATOR_URL },
-    { name: 'Script Engine', client: scriptEngineService, url: process.env.GUIONIX_SCRIPT_ENGINE_URL },
-    { name: 'Export Engine', client: exportEngineService, url: process.env.GUIONIX_EXPORT_ENGINE_URL }
+    { name: 'brain', client: brainService },
+    { name: 'aiOrchestrator', client: aiOrchestratorService },
+    { name: 'scriptEngine', client: scriptEngineService },
+    { name: 'exportEngine', client: exportEngineService },
+    { name: 'mlEngine', client: mlEngineService }
   ];
 
   const healthChecks = await Promise.allSettled(
@@ -85,14 +92,12 @@ export const checkServiceHealth = async () => {
         return {
           service: service.name,
           status: 'healthy',
-          url: service.url,
           response: response.status
         };
       } catch (error) {
         return {
           service: service.name,
           status: 'unhealthy',
-          url: service.url,
           error: error instanceof Error ? error.message : 'Unknown error'
         };
       }

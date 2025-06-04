@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   BarChart3, Bell, Film, FolderOpen, Home, Menu, Settings, Users,
-  Search, X, Cog, LogOut, ChevronDown, Sun, Moon, Target
+  Search, X, Cog, LogOut, ChevronDown, Sun, Moon, Target, Youtube
 } from "lucide-react";
 
 // UI Components
@@ -26,6 +26,8 @@ import ScriptStudioIntegrado from "./sections/ScriptStudioIntegrado";
 import AnalyticsIntelligence from "./sections/AnalyticsIntelligence";
 import TeamManagement from "./sections/TeamManagement";
 import SystemConfig from "./sections/SystemConfig";
+import YouTubeAnalytics from "./sections/YouTubeAnalytics";
+import NotificationCenter from "./NotificationCenter";
 
 // ====== TIPOS COMPARTIDOS ======
 export interface DashboardMetrics {
@@ -93,6 +95,7 @@ const GuionixUnifiedDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
   // Datos compartidos entre componentes
   const [dashboardMetrics] = useState<DashboardMetrics>({
@@ -159,7 +162,12 @@ const GuionixUnifiedDashboard = () => {
             </div>
             
             {/* Notificaciones */}
-            <Button variant="outline" size="sm" className="relative border-red-500/50 hover:bg-red-500/20">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="relative border-red-500/50 hover:bg-red-500/20"
+              onClick={() => setNotificationOpen(!notificationOpen)}
+            >
               <Bell className="w-4 h-4" />
               {dashboardMetrics.pendingApprovals > 0 && (
                 <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center bg-red-500 text-xs">
@@ -209,10 +217,16 @@ const GuionixUnifiedDashboard = () => {
         </div>
       </header>
 
+      {/* Notification Center */}
+      <NotificationCenter 
+        isOpen={notificationOpen} 
+        onClose={() => setNotificationOpen(false)} 
+      />
+
       {/* Sistema de Tabs Unificado */}
       <div className="px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-slate-800/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-7 bg-slate-800/50 p-1 rounded-xl">
             <TabsTrigger 
               value="dashboard" 
               className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-lg transition-all"
@@ -233,6 +247,13 @@ const GuionixUnifiedDashboard = () => {
             >
               <Target className="w-4 h-4 mr-2" />
               Studio
+            </TabsTrigger>
+            <TabsTrigger 
+              value="youtube" 
+              className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-lg transition-all"
+            >
+              <Youtube className="w-4 h-4 mr-2" />
+              YouTube
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
@@ -293,6 +314,18 @@ const GuionixUnifiedDashboard = () => {
             >
               <ScriptStudioIntegrado 
                 metrics={dashboardMetrics}
+                onNavigate={setActiveTab}
+              />
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="youtube" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <YouTubeAnalytics 
                 onNavigate={setActiveTab}
               />
             </motion.div>
