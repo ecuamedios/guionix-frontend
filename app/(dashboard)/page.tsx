@@ -54,6 +54,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import NotificationCenter from "@/components/dashboard/NotificationCenter";
 import { useToast, ToastContainer } from "@/components/ui/Toast";
+import { 
+  AdvancedMetric, 
+  AdvancedAreaChart, 
+  GenrePieChart, 
+  AdvancedActivityFeed 
+} from "@/components/dashboard/AdvancedComponents";
+import EmbeddedStudio from "@/components/dashboard/EmbeddedStudio";
 
 interface Project {
   id: string;
@@ -549,8 +556,39 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Advanced Analytics Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <AdvancedMetric
+              title="Guiones este mes"
+              value={15}
+              change={12.5}
+              icon={Film}
+              description="3 más que el mes pasado"
+            />
+            <AdvancedMetric
+              title="Colaboraciones activas"
+              value={8}
+              change={-5.2}
+              icon={Users}
+              description="Participación en proyectos"
+            />
+            <AdvancedMetric
+              title="Ideas IA generadas"
+              value={42}
+              change={28.3}
+              icon={Brain}
+              description="Productividad mejorada"
+            />
+          </div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <AdvancedAreaChart />
+            <GenrePieChart />
+          </div>
+
+          {/* Three Column Layout with Studio Integration */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Recent Projects */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
@@ -629,52 +667,18 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* AI Suggestions */}
+            {/* Embedded Studio Integration */}
+            <div>
+              <EmbeddedStudio />
+            </div>
+
+            {/* Activity Feed */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                <Brain className="w-5 h-5 mr-2 text-[#cb4335]" />
-                Sugerencias de IA
+                <Activity className="w-5 h-5 mr-2 text-[#cb4335]" />
+                Actividad Reciente
               </h2>
-              <div className="space-y-4">
-                {aiSuggestions.map((suggestion) => (
-                  <Card key={suggestion.id} className="bg-white dark:bg-[#1a252f] border-gray-200 dark:border-gray-700 hover:border-[#cb4335] transition-all duration-200 cursor-pointer group hover:shadow-lg">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#cb4335] transition-colors">
-                          {suggestion.title}
-                        </h3>
-                        {suggestion.type === 'trending' && (
-                          <Badge className="bg-gradient-to-r from-[#cb4335] to-[#a93226] text-white border-0">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            Trending
-                          </Badge>
-                        )}
-                        {suggestion.type === 'new' && (
-                          <Badge className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700">
-                            <Star className="w-3 h-3 mr-1" />
-                            Nuevo
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700">
-                          {suggestion.category}
-                        </Badge>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-[#cb4335] hover:text-white hover:bg-[#cb4335] transition-colors"
-                          onClick={() => router.push('/studio/new/phase/1')}
-                        >
-                          <Play className="w-4 h-4 mr-1" />
-                          Aplicar
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <AdvancedActivityFeed />
             </div>
           </div>
         </main>
